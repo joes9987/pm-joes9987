@@ -1,8 +1,12 @@
 'use client'
 
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Project } from '@/lib/types'
+
+const fieldClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm'
 
 export function ProjectManager ({
   initialProjects,
@@ -11,19 +15,28 @@ export function ProjectManager ({
   initialProjects: Project[]
   userId: string
 }) {
+  const router = useRouter()
   const [projects, setProjects] = useState(initialProjects)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   async function createProject (event: React.FormEvent) {
     event.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
+
     const supabase = createClient()
     const { data, error: insertError } = await supabase
       .from('projects')
       .insert({ name, description, owner_id: userId })
       .select('*')
       .single()
+
+    setLoading(false)
 
     if (insertError) {
       setError(insertError.message)
@@ -33,7 +46,8 @@ export function ProjectManager ({
     setProjects((prev) => [data as Project, ...prev])
     setName('')
     setDescription('')
-    setError(null)
+    setSuccess(`Project "${(data as Project).name}" created. You can now add tasks on the dashboard.`)
+    router.refresh()
   }
 
   async function toggleArchive (project: Project) {
@@ -62,27 +76,39 @@ export function ProjectManager ({
             Name
             <input
               required
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className={fieldClass}
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={loading}
             />
           </label>
           <label className="block text-sm font-medium text-zinc-700 md:col-span-2">
             Description
             <textarea
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className={fieldClass}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={loading}
             />
           </label>
           <div className="md:col-span-2">
-            <button type="submit" className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white">
-              Create project
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {loading ? 'Creating…' : 'Create project'}
             </button>
           </div>
         </form>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {success && (
+          <p className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
+            {success}{' '}
+            <Link href="/dashboard" className="font-semibold underline">Go to Dashboard →</Link>
+          </p>
+        )}
+        {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       </section>
 
       <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
@@ -103,7 +129,7 @@ export function ProjectManager ({
               <button
                 type="button"
                 onClick={() => toggleArchive(project)}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm"
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50"
               >
                 {project.archived ? 'Restore' : 'Archive'}
               </button>

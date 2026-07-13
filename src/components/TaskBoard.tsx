@@ -1,8 +1,13 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatStatus, TASK_STATUSES, type Profile, type Project, type Task, type TaskStatus } from '@/lib/types'
+
+const fieldClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm'
+const selectClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm'
 
 type TaskBoardProps = {
   initialTasks: Task[]
@@ -11,16 +16,37 @@ type TaskBoardProps = {
   currentUserId: string
 }
 
-export function TaskBoard ({ initialTasks, projects, members, currentUserId }: TaskBoardProps) {
+export function TaskBoard ({ initialTasks, projects: initialProjects, members, currentUserId }: TaskBoardProps) {
+  const [projects, setProjects] = useState(initialProjects)
   const [tasks, setTasks] = useState(initialTasks)
   const [projectFilter, setProjectFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? '')
+  const [projectId, setProjectId] = useState('')
   const [assigneeId, setAssigneeId] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const activeProjects = useMemo(
+    () => projects.filter((project) => !project.archived),
+    [projects]
+  )
+
+  useEffect(() => {
+    setProjects(initialProjects)
+  }, [initialProjects])
+
+  useEffect(() => {
+    if (activeProjects.length === 0) {
+      setProjectId('')
+      return
+    }
+    if (!projectId || !activeProjects.some((project) => project.id === projectId)) {
+      setProjectId(activeProjects[0].id)
+    }
+  }, [activeProjects, projectId])
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -34,9 +60,12 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
   async function createTask (event: React.FormEvent) {
     event.preventDefault()
     if (!projectId) {
-      setError('Create a project first.')
+      setError('Create a project first on the Projects page.')
       return
     }
+
+    setLoading(true)
+    setError(null)
 
     const supabase = createClient()
     const { data, error: insertError } = await supabase
@@ -52,6 +81,8 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
       .select('*')
       .single()
 
+    setLoading(false)
+
     if (insertError) {
       setError(insertError.message)
       return
@@ -61,7 +92,6 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
     setTitle('')
     setDescription('')
     setAssigneeId('')
-    setError(null)
   }
 
   async function updateTaskStatus (taskId: string, status: TaskStatus) {
@@ -89,6 +119,18 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
 
   return (
     <div className="space-y-6">
+      {activeProjects.length === 0 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+          <p className="font-medium">No projects yet</p>
+          <p className="mt-1 text-amber-900">
+            Create a project before adding tasks.{' '}
+            <Link href="/projects" className="font-semibold underline">
+              Go to Projects →
+            </Link>
+          </p>
+        </div>
+      )}
+
       <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-zinc-900">Create task</h2>
         <form onSubmit={createTask} className="mt-4 grid gap-4 md:grid-cols-2">
@@ -96,39 +138,47 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
             Title
             <input
               required
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className={fieldClass}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              disabled={activeProjects.length === 0 || loading}
             />
           </label>
           <label className="block text-sm font-medium text-zinc-700 md:col-span-2">
             Description
             <textarea
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className={fieldClass}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={activeProjects.length === 0 || loading}
             />
           </label>
           <label className="block text-sm font-medium text-zinc-700">
             Project
             <select
               required
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className={selectClass}
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
+              disabled={activeProjects.length === 0 || loading}
             >
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>{project.name}</option>
-              ))}
+              {activeProjects.length === 0 ? (
+                <option value="">No projects — create one first</option>
+              ) : (
+                activeProjects.map((project) => (
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                ))
+              )}
             </select>
           </label>
           <label className="block text-sm font-medium text-zinc-700">
             Assignee
             <select
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              className={selectClass}
               value={assigneeId}
               onChange={(e) => setAssigneeId(e.target.value)}
+              disabled={activeProjects.length === 0 || loading}
             >
               <option value="">Unassigned</option>
               {members.map((member) => (
@@ -137,8 +187,12 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
             </select>
           </label>
           <div className="md:col-span-2">
-            <button type="submit" className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white">
-              Add task
+            <button
+              type="submit"
+              disabled={activeProjects.length === 0 || loading}
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? 'Adding…' : 'Add task'}
             </button>
           </div>
         </form>
@@ -150,16 +204,24 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
           <h2 className="mr-auto text-lg font-semibold text-zinc-900">Tasks ({filteredTasks.length})</h2>
           <label className="text-sm text-zinc-600">
             Project
-            <select className="ml-2 rounded border border-zinc-300 px-2 py-1" value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}>
+            <select
+              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900"
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+            >
               <option value="all">All</option>
-              {projects.map((project) => (
+              {activeProjects.map((project) => (
                 <option key={project.id} value={project.id}>{project.name}</option>
               ))}
             </select>
           </label>
           <label className="text-sm text-zinc-600">
             Status
-            <select className="ml-2 rounded border border-zinc-300 px-2 py-1" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select
+              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
               <option value="all">All</option>
               {TASK_STATUSES.map((status) => (
                 <option key={status} value={status}>{formatStatus(status)}</option>
@@ -168,7 +230,11 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
           </label>
           <label className="text-sm text-zinc-600">
             Assignee
-            <select className="ml-2 rounded border border-zinc-300 px-2 py-1" value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
+            <select
+              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900"
+              value={assigneeFilter}
+              onChange={(e) => setAssigneeFilter(e.target.value)}
+            >
               <option value="all">All</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>{member.display_name}</option>
@@ -191,7 +257,7 @@ export function TaskBoard ({ initialTasks, projects, members, currentUserId }: T
                 </p>
               </div>
               <select
-                className="rounded border border-zinc-300 px-2 py-1 text-sm"
+                className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900"
                 value={task.status}
                 onChange={(e) => updateTaskStatus(task.id, e.target.value as TaskStatus)}
               >

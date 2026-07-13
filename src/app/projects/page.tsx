@@ -27,7 +27,7 @@ export default async function ProjectsPage () {
     .order('created_at', { ascending: false })
 
   return (
-    <>
+    <div className="min-h-screen bg-zinc-50">
       <AppHeader email={user.email ?? 'unknown'} />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6">
@@ -39,6 +39,6 @@ export default async function ProjectsPage () {
           userId={user.id}
         />
       </main>
-    </>
+    </div>
   )
 }

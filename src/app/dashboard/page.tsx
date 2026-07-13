@@ -28,7 +28,7 @@ export default async function DashboardPage () {
   ])
 
   return (
-    <>
+    <div className="min-h-screen bg-zinc-50">
       <AppHeader email={user.email ?? 'unknown'} />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6">
@@ -42,6 +42,6 @@ export default async function DashboardPage () {
           currentUserId={user.id}
         />
       </main>
-    </>
+    </div>
   )
 }

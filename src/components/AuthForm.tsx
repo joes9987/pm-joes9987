@@ -50,12 +50,12 @@ export function AuthForm ({ mode }: { mode: 'login' | 'signup' }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {mode === 'signup' && (
         <label className="block text-sm font-medium text-zinc-700">
           Display name
           <input
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Joseph Singh"
@@ -67,7 +67,7 @@ export function AuthForm ({ mode }: { mode: 'login' | 'signup' }) {
         <input
           required
           type="email"
-          className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
@@ -79,16 +79,16 @@ export function AuthForm ({ mode }: { mode: 'login' | 'signup' }) {
           required
           type="password"
           minLength={6}
-          className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+        className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
       >
         {loading ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
       </button>
