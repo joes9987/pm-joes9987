@@ -4,7 +4,7 @@ Project 1 submission for the Hult Cohort Summer Pilot 2026: a production project
 
 ## Production URL
 
-Set after Vercel deploy — see latest release or Vercel dashboard for `pm-joes9987`.
+https://pm-joes9987.vercel.app
 
 ## Stack
 
