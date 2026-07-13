@@ -1,14 +1,22 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage () {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) redirect('/dashboard')
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase ? await supabase.auth.getUser() : { data: { user: null } }
+    if (user) redirect('/dashboard')
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-16">
+      {!isSupabaseConfigured() && (
+        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Backend pending: add Supabase env vars in Vercel and run `supabase/schema.sql`.
+        </p>
+      )}
       <p className="text-sm font-medium uppercase tracking-wide text-zinc-500">Hult Cohort · Project 1</p>
       <h1 className="mt-2 text-4xl font-semibold tracking-tight text-zinc-900">
         Cohort PM
