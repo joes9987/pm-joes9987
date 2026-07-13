@@ -6,8 +6,10 @@ import { createClient } from '@/lib/supabase/server'
 export default async function HomePage () {
   if (isSupabaseConfigured()) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase ? await supabase.auth.getUser() : { data: { user: null } }
-    if (user) redirect('/dashboard')
+    if (supabase) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) redirect('/dashboard')
+    }
   }
 
   return (
