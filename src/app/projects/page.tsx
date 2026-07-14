@@ -27,12 +27,12 @@ export default async function ProjectsPage () {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
       <AppHeader email={user.email ?? 'unknown'} />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-900">Projects</h1>
-          <p className="text-sm text-zinc-600">Create and archive cohort projects.</p>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Projects</h1>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">Create and archive cohort projects.</p>
         </div>
         <ProjectManager
           initialProjects={(projects ?? []) as Project[]}

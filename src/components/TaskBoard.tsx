@@ -6,8 +6,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatStatus, TASK_STATUSES, type Profile, type Project, type Task, type TaskStatus } from '@/lib/types'
 
-const fieldClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm'
-const selectClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm'
+const fieldClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100'
+const selectClass = fieldClass
 
 type TaskBoardProps = {
   initialTasks: Task[]
@@ -120,9 +120,9 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
   return (
     <div className="space-y-6">
       {activeProjects.length === 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
           <p className="font-medium">No projects yet</p>
-          <p className="mt-1 text-amber-900">
+          <p className="mt-1 text-amber-900 dark:text-amber-200">
             Create a project before adding tasks.{' '}
             <Link href="/projects" className="font-semibold underline">
               Go to Projects →
@@ -131,10 +131,10 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
         </div>
       )}
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-zinc-900">Create task</h2>
+      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Create task</h2>
         <form onSubmit={createTask} className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-zinc-700 md:col-span-2">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 md:col-span-2">
             Title
             <input
               required
@@ -144,7 +144,7 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
               disabled={activeProjects.length === 0 || loading}
             />
           </label>
-          <label className="block text-sm font-medium text-zinc-700 md:col-span-2">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 md:col-span-2">
             Description
             <textarea
               className={fieldClass}
@@ -154,7 +154,7 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
               disabled={activeProjects.length === 0 || loading}
             />
           </label>
-          <label className="block text-sm font-medium text-zinc-700">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Project
             <select
               required
@@ -172,7 +172,7 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
               )}
             </select>
           </label>
-          <label className="block text-sm font-medium text-zinc-700">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Assignee
             <select
               className={selectClass}
@@ -190,22 +190,22 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
             <button
               type="submit"
               disabled={activeProjects.length === 0 || loading}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
               {loading ? 'Adding…' : 'Add task'}
             </button>
           </div>
         </form>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
       </section>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
         <div className="flex flex-wrap items-end gap-4">
-          <h2 className="mr-auto text-lg font-semibold text-zinc-900">Tasks ({filteredTasks.length})</h2>
-          <label className="text-sm text-zinc-600">
+          <h2 className="mr-auto text-lg font-semibold text-zinc-900 dark:text-zinc-50">Tasks ({filteredTasks.length})</h2>
+          <label className="text-sm text-zinc-600 dark:text-zinc-300">
             Project
             <select
-              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900"
+              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
             >
@@ -215,10 +215,10 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
               ))}
             </select>
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm text-zinc-600 dark:text-zinc-300">
             Status
             <select
-              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900"
+              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -228,10 +228,10 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
               ))}
             </select>
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm text-zinc-600 dark:text-zinc-300">
             Assignee
             <select
-              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900"
+              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
               value={assigneeFilter}
               onChange={(e) => setAssigneeFilter(e.target.value)}
             >
@@ -243,21 +243,21 @@ export function TaskBoard ({ initialTasks, projects: initialProjects, members, c
           </label>
         </div>
 
-        <ul className="mt-4 divide-y divide-zinc-100">
+        <ul className="mt-4 divide-y divide-zinc-100 dark:divide-zinc-700">
           {filteredTasks.length === 0 && (
-            <li className="py-8 text-center text-sm text-zinc-500">No tasks match these filters.</li>
+            <li className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">No tasks match these filters.</li>
           )}
           {filteredTasks.map((task) => (
             <li key={task.id} className="flex flex-col gap-2 py-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="font-medium text-zinc-900">{task.title}</p>
-                <p className="text-sm text-zinc-600">{task.description || 'No description'}</p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="font-medium text-zinc-900 dark:text-zinc-100">{task.title}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-300">{task.description || 'No description'}</p>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                   {projectName(task.project_id)} · {memberName(task.assignee_id)}
                 </p>
               </div>
               <select
-                className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900"
+                className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
                 value={task.status}
                 onChange={(e) => updateTaskStatus(task.id, e.target.value as TaskStatus)}
               >

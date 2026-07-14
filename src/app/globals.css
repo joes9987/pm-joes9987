@@ -1,9 +1,32 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  color-scheme: light;
   --background: #fafafa;
   --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #27272a;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --input-bg: #ffffff;
+  --input-fg: #18181b;
+  --primary: #18181b;
+  --primary-fg: #fafafa;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #18181b;
+  --foreground: #f4f4f5;
+  --card: #27272a;
+  --card-foreground: #f4f4f5;
+  --muted: #a1a1aa;
+  --border: #52525b;
+  --input-bg: #3f3f46;
+  --input-fg: #f4f4f5;
+  --primary: #f4f4f5;
+  --primary-fg: #18181b;
 }
 
 @theme inline {
@@ -13,30 +36,25 @@
   --font-mono: var(--font-geist-mono);
 }
 
-html {
-  color-scheme: light;
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Consistent form controls across browsers */
 input,
 textarea,
 select {
-  color: #18181b;
-  background-color: #ffffff;
+  color: var(--input-fg);
+  background-color: var(--input-bg);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #71717a;
+  color: var(--muted);
 }
 
 select option {
-  color: #18181b;
-  background-color: #ffffff;
+  color: var(--input-fg);
+  background-color: var(--input-bg);
 }
