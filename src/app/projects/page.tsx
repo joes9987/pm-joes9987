@@ -4,6 +4,7 @@ import { ProjectManager } from '@/components/ProjectManager'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 import type { Project } from '@/lib/types'
+import { ui } from '@/lib/ui'
 
 export default async function ProjectsPage () {
   if (!isSupabaseConfigured()) {
@@ -28,10 +29,11 @@ export default async function ProjectsPage () {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Projects</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">Create and archive cohort projects.</p>
+      <main className={ui.pageMain}>
+        <div className="mb-6 animate-fade-up">
+          <p className={ui.eyebrow}>Workspaces</p>
+          <h1 className={`${ui.pageTitle} mt-1`}>Projects</h1>
+          <p className={`${ui.pageSubtitle} mt-1`}>Create and archive cohort projects.</p>
         </div>
         <ProjectManager
           initialProjects={(projects ?? []) as Project[]}

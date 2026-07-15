@@ -3,6 +3,7 @@ import { AppHeader } from '@/components/AppHeader'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 import { fetchUserNotifications, syncDeadlineNotifications } from '@/lib/notifications'
+import { ui } from '@/lib/ui'
 import type { Notification } from '@/lib/types'
 
 type AppShellProps = {
@@ -32,7 +33,7 @@ export async function AppShell ({ children }: AppShellProps) {
   const notifications = await fetchUserNotifications(supabase, user.id)
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+    <div className={ui.meshBg}>
       <AppHeader
         email={user.email ?? 'unknown'}
         userId={user.id}

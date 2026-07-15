@@ -3,6 +3,7 @@ import { AppShell } from '@/components/AppShell'
 import { computeProjectMetrics, formatProjectCountdown } from '@/lib/task-deadlines'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
+import { ui } from '@/lib/ui'
 import type { Project, Task } from '@/lib/types'
 
 export default async function ProgressPage () {
@@ -10,7 +11,7 @@ export default async function ProgressPage () {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="text-2xl font-semibold">Progress unavailable</h1>
-        <p className="mt-2 text-sm text-zinc-600">Configure Supabase environment variables to enable auth and data.</p>
+        <p className="mt-2 text-sm text-[var(--muted)]">Configure Supabase environment variables to enable auth and data.</p>
       </main>
     )
   }
@@ -31,76 +32,78 @@ export default async function ProgressPage () {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Progress</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+      <main className={ui.pageMain}>
+        <div className="mb-6 animate-fade-up">
+          <p className={ui.eyebrow}>Metrics</p>
+          <h1 className={`${ui.pageTitle} mt-1`}>Progress</h1>
+          <p className={`${ui.pageSubtitle} mt-1`}>
             Track completion and deadlines across cohort projects.
           </p>
         </div>
 
         {projectList.length === 0 ? (
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+          <div className={`${ui.card} text-sm text-[var(--muted-foreground)]`}>
             No active projects yet. Create one on the Projects page to see metrics here.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {projectList.map((project) => {
+            {projectList.map((project, index) => {
               const metrics = computeProjectMetrics(project.id, taskList)
               const countdown = formatProjectCountdown(project.target_date)
 
               return (
                 <article
                   key={project.id}
-                  className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+                  className={`${ui.card} animate-fade-up`}
+                  style={{ animationDelay: `${index * 0.06}s` }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{project.name}</h2>
-                      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                      <h2 className={ui.sectionTitle}>{project.name}</h2>
+                      <p className="mt-1 text-sm text-[var(--muted-foreground)]">
                         {project.description || 'No description'}
                       </p>
                     </div>
                     {countdown && (
-                      <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
                         countdown.includes('past deadline')
-                          ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
-                          : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200'
+                          ? 'bg-[var(--danger-bg)] text-[var(--danger-fg)]'
+                          : 'bg-[var(--accent-soft)] text-[var(--accent-foreground)]'
                       }`}>
                         {countdown}
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-300">
+                  <div className="mt-5">
+                    <div className="flex items-center justify-between text-sm text-[var(--muted-foreground)]">
                       <span>Completion</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">{metrics.completionRate}%</span>
+                      <span className="font-semibold text-[var(--foreground)]">{metrics.completionRate}%</span>
                     </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+                    <div className="progress-bar-track mt-2 h-2.5 overflow-hidden rounded-full">
                       <div
-                        className="h-full rounded-full bg-emerald-500"
+                        className="progress-bar-fill h-full rounded-full transition-all duration-500"
                         style={{ width: `${metrics.completionRate}%` }}
                       />
                     </div>
                   </div>
 
-                  <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <dt className="text-zinc-500 dark:text-zinc-400">Total tasks</dt>
-                      <dd className="font-semibold text-zinc-900 dark:text-zinc-100">{metrics.total}</dd>
+                  <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                    <div className="rounded-xl bg-[var(--card-solid)] p-3">
+                      <dt className="text-[var(--muted)]">Total tasks</dt>
+                      <dd className="mt-1 text-lg font-bold text-[var(--foreground)]">{metrics.total}</dd>
                     </div>
-                    <div>
-                      <dt className="text-zinc-500 dark:text-zinc-400">Done</dt>
-                      <dd className="font-semibold text-zinc-900 dark:text-zinc-100">{metrics.done}</dd>
+                    <div className="rounded-xl bg-[var(--card-solid)] p-3">
+                      <dt className="text-[var(--muted)]">Done</dt>
+                      <dd className="mt-1 text-lg font-bold text-[var(--foreground)]">{metrics.done}</dd>
                     </div>
-                    <div>
-                      <dt className="text-zinc-500 dark:text-zinc-400">In progress</dt>
-                      <dd className="font-semibold text-zinc-900 dark:text-zinc-100">{metrics.inProgress}</dd>
+                    <div className="rounded-xl bg-[var(--card-solid)] p-3">
+                      <dt className="text-[var(--muted)]">In progress</dt>
+                      <dd className="mt-1 text-lg font-bold text-[var(--foreground)]">{metrics.inProgress}</dd>
                     </div>
-                    <div>
-                      <dt className="text-zinc-500 dark:text-zinc-400">Overdue</dt>
-                      <dd className={`font-semibold ${metrics.overdue > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                    <div className="rounded-xl bg-[var(--card-solid)] p-3">
+                      <dt className="text-[var(--muted)]">Overdue</dt>
+                      <dd className={`mt-1 text-lg font-bold ${metrics.overdue > 0 ? 'text-[var(--danger-fg)]' : 'text-[var(--foreground)]'}`}>
                         {metrics.overdue}
                       </dd>
                     </div>

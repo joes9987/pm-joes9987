@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { ui } from '@/lib/ui'
 
 export function AuthForm ({ mode }: { mode: 'login' | 'signup' }) {
   const router = useRouter()
@@ -52,51 +53,47 @@ export function AuthForm ({ mode }: { mode: 'login' | 'signup' }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {mode === 'signup' && (
-        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label className={ui.label}>
           Display name
           <input
-            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+            className={ui.field}
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Joseph Singh"
           />
         </label>
       )}
-      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <label className={ui.label}>
         Email
         <input
           required
           type="email"
-          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+          className={ui.field}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
         />
       </label>
-      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <label className={ui.label}>
         Password
         <input
           required
           type="password"
           minLength={6}
-          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+          className={ui.field}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </label>
-      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-      >
+      {error && <p className={ui.alertError}>{error}</p>}
+      <button type="submit" disabled={loading} className={`w-full ${ui.btnPrimary}`}>
         {loading ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
       </button>
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-300">
+      <p className="text-center text-sm text-[var(--muted-foreground)]">
         {mode === 'signup' ? (
-          <>Already have an account? <Link href="/login" className="font-medium text-zinc-900 underline dark:text-zinc-100">Sign in</Link></>
+          <>Already have an account? <Link href="/login" className={ui.linkAccent}>Sign in</Link></>
         ) : (
-          <>Need an account? <Link href="/signup" className="font-medium text-zinc-900 underline dark:text-zinc-100">Sign up</Link></>
+          <>Need an account? <Link href="/signup" className={ui.linkAccent}>Sign up</Link></>
         )}
       </p>
     </form>

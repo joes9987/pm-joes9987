@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotificationBell } from '@/components/NotificationBell'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ui } from '@/lib/ui'
 import type { Notification } from '@/lib/types'
 
 export function SignOutButton () {
@@ -18,11 +20,7 @@ export function SignOutButton () {
   }
 
   return (
-    <button
-      type="button"
-      onClick={signOut}
-      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
-    >
+    <button type="button" onClick={signOut} className={ui.btnGhost}>
       Sign out
     </button>
   )
@@ -34,26 +32,38 @@ type AppHeaderProps = {
   initialNotifications: Notification[]
 }
 
+function NavLink ({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname()
+  const active = pathname === href
+
+  return (
+    <Link
+      href={href}
+      className={`${ui.navLink} ${active ? 'bg-[var(--nav-active)] text-[var(--nav-active-fg)]' : ''}`}
+      aria-current={active ? 'page' : undefined}
+    >
+      {label}
+    </Link>
+  )
+}
+
 export function AppHeader ({ email, userId, initialNotifications }: AppHeaderProps) {
   return (
-    <header className="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
+    <header className="app-header sticky top-0 z-40">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <div>
-          <Link href="/dashboard" className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            Cohort PM
-          </Link>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Signed in as {email}</p>
+        <div className="flex items-center gap-3">
+          <span className="brand-mark" aria-hidden>PM</span>
+          <div>
+            <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+              <span className="text-gradient">Cohort PM</span>
+            </Link>
+            <p className="text-xs text-[var(--muted)]">{email}</p>
+          </div>
         </div>
-        <nav className="flex flex-wrap items-center gap-3">
-          <Link href="/dashboard" className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100">
-            Dashboard
-          </Link>
-          <Link href="/projects" className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100">
-            Projects
-          </Link>
-          <Link href="/progress" className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100">
-            Progress
-          </Link>
+        <nav className="flex flex-wrap items-center gap-2">
+          <NavLink href="/dashboard" label="Dashboard" />
+          <NavLink href="/projects" label="Projects" />
+          <NavLink href="/progress" label="Progress" />
           <NotificationBell userId={userId} initialNotifications={initialNotifications} />
           <ThemeToggle />
           <SignOutButton />

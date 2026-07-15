@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
+import { ui } from '@/lib/ui'
 
 export default async function HomePage () {
   if (isSupabaseConfigured()) {
@@ -14,37 +15,54 @@ export default async function HomePage () {
   }
 
   return (
-    <main className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-16">
+    <main className={`${ui.meshBg} relative flex min-h-screen flex-col justify-center px-4 py-16`}>
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
 
-      {!isSupabaseConfigured() && (
-        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
-          Backend pending: add Supabase env vars in Vercel and run `supabase/schema.sql`.
-        </p>
-      )}
-      <p className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Hult Cohort · Project 1</p>
-      <h1 className="mt-2 text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-        Cohort PM
-      </h1>
-      <p className="mt-4 max-w-xl text-lg text-zinc-600 dark:text-zinc-300">
-        A lightweight project management platform for 30+ cohort members — projects, tasks, assignments, and status workflows in one place.
-      </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/signup" className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
-          Get started
-        </Link>
-        <Link href="/login" className="rounded-lg border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-white dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800">
-          Sign in
-        </Link>
+      <div className="mx-auto w-full max-w-3xl">
+        {!isSupabaseConfigured() && (
+          <p className={`${ui.alertWarning} mb-6 animate-fade-up`}>
+            Backend pending: add Supabase env vars in Vercel and run `supabase/schema.sql`.
+          </p>
+        )}
+
+        <div className="animate-fade-up">
+          <span className="brand-mark mb-4">PM</span>
+          <p className={ui.eyebrow}>Hult Cohort · Project 1</p>
+          <h1 className="mt-3 text-5xl font-bold tracking-tight">
+            <span className="text-gradient">Cohort PM</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--muted-foreground)]">
+            A lightweight project management platform for 30+ cohort members — projects, tasks, deadlines, and progress in one place.
+          </p>
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3 animate-fade-up animate-fade-up-delay-1">
+          <Link href="/signup" className={ui.btnPrimaryLg}>
+            Get started
+          </Link>
+          <Link href="/login" className={ui.btnSecondary}>
+            Sign in
+          </Link>
+        </div>
+
+        <div className="mt-12 grid gap-3 sm:grid-cols-2 animate-fade-up animate-fade-up-delay-2">
+          {[
+            'Email/password auth for 30+ accounts',
+            'Projects with archive support',
+            'Due dates and in-app notifications',
+            'Progress metrics across projects'
+          ].map((item) => (
+            <div key={item} className={`${ui.cardSm} flex items-start gap-3`}>
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-bold text-[var(--accent-foreground)]">
+                ✓
+              </span>
+              <span className="text-sm text-[var(--muted-foreground)]">{item}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <ul className="mt-10 grid gap-3 text-sm text-zinc-600 dark:text-zinc-300 md:grid-cols-2">
-        <li>✓ Email/password auth for 30+ accounts</li>
-        <li>✓ Projects with archive support</li>
-        <li>✓ Tasks with todo / in progress / done</li>
-        <li>✓ Filter by project, status, assignee</li>
-      </ul>
     </main>
   )
 }

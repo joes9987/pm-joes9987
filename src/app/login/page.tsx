@@ -1,19 +1,21 @@
 import Link from 'next/link'
 import { AuthForm } from '@/components/AuthForm'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ui } from '@/lib/ui'
 
 export default function LoginPage () {
   return (
-    <main className="relative mx-auto flex min-h-screen max-w-md flex-col justify-center bg-zinc-50 px-4 py-16 dark:bg-zinc-900">
+    <main className={`${ui.meshBg} relative flex min-h-screen flex-col justify-center ${ui.pageMainNarrow}`}>
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200">
+      <div className={`${ui.cardElevated} animate-fade-up`}>
+        <Link href="/" className="text-sm font-medium text-[var(--muted)] transition hover:text-[var(--primary)]">
           ← Back to home
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Sign in</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Access your cohort projects and tasks.</p>
+        <p className={`${ui.eyebrow} mt-6`}>Welcome back</p>
+        <h1 className={`${ui.pageTitle} mt-2`}>Sign in</h1>
+        <p className={`${ui.pageSubtitle} mt-2`}>Access your cohort projects and tasks.</p>
         <div className="mt-6">
           <AuthForm mode="login" />
         </div>

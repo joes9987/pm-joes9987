@@ -15,10 +15,11 @@ import {
   sortByUrgency,
   type QuickFilter
 } from '@/lib/task-deadlines'
+import { ui } from '@/lib/ui'
 import { formatStatus, TASK_STATUSES, type Profile, type Project, type Task, type TaskStatus } from '@/lib/types'
 
-const fieldClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100'
-const selectClass = fieldClass
+const fieldClass = ui.field
+const selectClass = ui.field
 
 type TaskBoardProps = {
   initialTasks: Task[]
@@ -186,27 +187,25 @@ export function TaskBoard ({
   return (
     <div className="space-y-6">
       {completionMessage && (
-        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-100">
-          {completionMessage}
-        </div>
+        <div className={ui.alertSuccess}>{completionMessage}</div>
       )}
 
       {activeProjects.length === 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+        <div className={ui.alertWarning}>
           <p className="font-medium">No projects yet</p>
-          <p className="mt-1 text-amber-900 dark:text-amber-200">
+          <p className="mt-1">
             Create a project before adding tasks.{' '}
-            <Link href="/projects" className="font-semibold underline">
+            <Link href="/projects" className={ui.linkAccent}>
               Go to Projects →
             </Link>
           </p>
         </div>
       )}
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Create task</h2>
+      <section className={ui.card}>
+        <h2 className={ui.sectionTitle}>Create task</h2>
         <form onSubmit={createTask} className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 md:col-span-2">
+          <label className={`${ui.label} md:col-span-2`}>
             Title
             <input
               required
@@ -216,7 +215,7 @@ export function TaskBoard ({
               disabled={activeProjects.length === 0 || loading}
             />
           </label>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 md:col-span-2">
+          <label className={`${ui.label} md:col-span-2`}>
             Description
             <textarea
               className={fieldClass}
@@ -226,7 +225,7 @@ export function TaskBoard ({
               disabled={activeProjects.length === 0 || loading}
             />
           </label>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className={ui.label}>
             Project
             <select
               required
@@ -244,7 +243,7 @@ export function TaskBoard ({
               )}
             </select>
           </label>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className={ui.label}>
             Assignee
             <select
               className={selectClass}
@@ -258,7 +257,7 @@ export function TaskBoard ({
               ))}
             </select>
           </label>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 md:col-span-2">
+          <label className={`${ui.label} md:col-span-2`}>
             Due date (optional)
             <input
               type="datetime-local"
@@ -272,18 +271,18 @@ export function TaskBoard ({
             <button
               type="submit"
               disabled={activeProjects.length === 0 || loading}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className={`${ui.btnPrimary} disabled:cursor-not-allowed`}
             >
               {loading ? 'Adding…' : 'Add task'}
             </button>
           </div>
         </form>
-        {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className={`mt-3 ${ui.alertError}`}>{error}</p>}
       </section>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+      <section className={ui.card}>
         <div className="flex flex-wrap items-end gap-4">
-          <h2 className="mr-auto text-lg font-semibold text-zinc-900 dark:text-zinc-50">Tasks ({filteredTasks.length})</h2>
+          <h2 className={`mr-auto ${ui.sectionTitle}`}>Tasks ({filteredTasks.length})</h2>
           <div className="flex flex-wrap gap-2">
             {([
               ['all', 'All'],
@@ -295,20 +294,16 @@ export function TaskBoard ({
                 key={value}
                 type="button"
                 onClick={() => applyQuickFilter(value)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  quickFilter === value
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'border border-zinc-300 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700'
-                }`}
+                className={quickFilter === value ? ui.btnFilterActive : ui.btnFilterIdle}
               >
                 {label}
               </button>
             ))}
           </div>
-          <label className="text-sm text-zinc-600 dark:text-zinc-300">
+          <label className="text-sm text-[var(--muted-foreground)]">
             Project
             <select
-              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+              className={`ml-2 ${ui.select}`}
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
             >
@@ -318,10 +313,10 @@ export function TaskBoard ({
               ))}
             </select>
           </label>
-          <label className="text-sm text-zinc-600 dark:text-zinc-300">
+          <label className="text-sm text-[var(--muted-foreground)]">
             Status
             <select
-              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+              className={`ml-2 ${ui.select}`}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -331,10 +326,10 @@ export function TaskBoard ({
               ))}
             </select>
           </label>
-          <label className="text-sm text-zinc-600 dark:text-zinc-300">
+          <label className="text-sm text-[var(--muted-foreground)]">
             Assignee
             <select
-              className="ml-2 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+              className={`ml-2 ${ui.select}`}
               value={assigneeFilter}
               onChange={(e) => {
                 setAssigneeFilter(e.target.value)
@@ -351,9 +346,9 @@ export function TaskBoard ({
           </label>
         </div>
 
-        <ul className="mt-4 divide-y divide-zinc-100 dark:divide-zinc-700">
+        <ul className={`mt-4 ${ui.divider}`}>
           {filteredTasks.length === 0 && (
-            <li className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">No tasks match these filters.</li>
+            <li className="py-8 text-center text-sm text-[var(--muted)]">No tasks match these filters.</li>
           )}
           {filteredTasks.map((task) => {
             const deadlineStatus = getDeadlineStatus(task.due_date, task.status)
@@ -364,26 +359,26 @@ export function TaskBoard ({
                 key={task.id}
                 ref={isHighlighted ? highlightRef : null}
                 className={`flex flex-col gap-2 py-4 md:flex-row md:items-center md:justify-between ${
-                  isHighlighted ? 'rounded-lg bg-amber-50 px-3 dark:bg-amber-950/40' : ''
+                  isHighlighted ? 'rounded-xl border border-[var(--primary)]/30 bg-[var(--nav-active)]/50 px-3' : ''
                 }`}
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium text-zinc-900 dark:text-zinc-100">{task.title}</p>
+                    <p className="font-medium text-[var(--foreground)]">{task.title}</p>
                     {deadlineStatus !== 'none' && (
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${deadlineBadgeClass(deadlineStatus)}`}>
                         {deadlineBadgeLabel(deadlineStatus)}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-300">{task.description || 'No description'}</p>
-                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm text-[var(--muted-foreground)]">{task.description || 'No description'}</p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">
                     {projectName(task.project_id)} · {memberName(task.assignee_id)}
                     {task.due_date && ` · Due ${formatDueDate(task.due_date)}`}
                   </p>
                 </div>
                 <select
-                  className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                  className={ui.select}
                   value={task.status}
                   onChange={(e) => updateTaskStatus(task.id, e.target.value as TaskStatus)}
                 >

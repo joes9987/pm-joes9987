@@ -12,7 +12,7 @@ export function ThemeToggle ({ className = '' }: { className?: string }) {
   }, [])
 
   if (!mounted) {
-    return <div className={`h-9 w-9 rounded-lg border border-transparent ${className}`} aria-hidden />
+    return <div className={`h-9 w-9 rounded-xl border border-transparent ${className}`} aria-hidden />
   }
 
   const isDark = resolvedTheme === 'dark'
@@ -22,7 +22,7 @@ export function ThemeToggle ({ className = '' }: { className?: string }) {
       type="button"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 ${className}`}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border-strong)] bg-[var(--card-solid)] text-[var(--muted-foreground)] transition hover:border-[var(--primary)] hover:text-[var(--primary)] ${className}`}
     >
       {isDark ? (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
