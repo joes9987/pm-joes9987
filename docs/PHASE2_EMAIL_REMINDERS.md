@@ -1,61 +1,55 @@
-# Phase 2: Email deadline reminders (backlog)
+# Phase 2: Email deadline reminders (Brevo)
 
-In-app motivation features ship in Phase 1. Email digests are planned as a follow-up PR.
+**Status:** Implemented — see [BREVO_EMAIL_SETUP.md](./BREVO_EMAIL_SETUP.md) for deployment steps.
 
 ## Goal
 
 Send one daily digest per user listing overdue, due-today, and due-tomorrow tasks assigned to them.
 
-## Proposed architecture
+## Architecture
 
 ```mermaid
 flowchart LR
-  VercelCron[Vercel Cron daily 08:00 UTC]
-  EdgeFn[Supabase Edge Function send-deadline-reminders]
-  Postgres[(tasks + profiles)]
-  Resend[Resend API]
-  UserInbox[User email]
-  VercelCron --> EdgeFn
-  EdgeFn --> Postgres
-  EdgeFn --> Resend
-  Resend --> UserInbox
+  pgCron[Supabase pg_cron 08:00 UTC]
+  edgeFn[Edge Function send-deadline-reminders]
+  db[(tasks profiles email_sent_log)]
+  brevo[Brevo API]
+  inbox[User inbox]
+  pgCron --> edgeFn
+  edgeFn --> db
+  edgeFn --> brevo
+  brevo --> inbox
 ```
 
-## Implementation checklist
+## Components
 
-1. **Resend account** — create API key; add `RESEND_API_KEY` to Vercel + Supabase secrets.
-2. **Edge Function** — `supabase/functions/send-deadline-reminders/index.ts`:
-   - Query open tasks grouped by assignee email
-   - Sections: Overdue | Due today | Due tomorrow
-   - CTA: `https://pm-joes9987.vercel.app/dashboard?filter=mine`
-3. **Idempotency** — add `email_sent_log` table or store `last_digest_sent_at` on profiles to avoid duplicate daily sends.
-4. **Cron** — Vercel `vercel.json` cron hitting the function with `CRON_SECRET` header.
-5. **Auth** — function uses service role key; never expose in client.
+| Piece | Location |
+|-------|----------|
+| Edge Function | `supabase/functions/send-deadline-reminders/index.ts` |
+| Idempotency table | `supabase/migrations/20260715_email_digest_brevo.sql` |
+| Cron schedule | `supabase/sql/schedule_email_digest_cron.sql` |
+| Setup guide | `docs/BREVO_EMAIL_SETUP.md` |
 
-## Environment variables
+## Why Brevo
 
-| Variable | Where |
-|----------|-------|
-| `RESEND_API_KEY` | Vercel, Supabase Edge Function |
-| `CRON_SECRET` | Vercel cron config, Edge Function |
-| `SUPABASE_SERVICE_ROLE_KEY` | Edge Function only |
+- 300 emails/day free tier (vs Resend 100/day)
+- Simple REST API from Edge Functions
+- Works well for cohort-scale daily digests
 
-## Email template (draft)
+## Secrets (Supabase Edge Function)
 
-**Subject:** You have {n} tasks due today — Cohort PM
+| Variable | Purpose |
+|----------|---------|
+| `BREVO_API_KEY` | Brevo transactional API key |
+| `BREVO_SENDER_EMAIL` | Verified sender in Brevo |
+| `BREVO_SENDER_NAME` | Display name (optional) |
+| `CRON_SECRET` | Auth for cron + manual test calls |
+| `APP_URL` | CTA link in digest email |
 
-**Body:**
-- Overdue (red list)
-- Due today
-- Due tomorrow
-- Button: Open my dashboard
+## Email content
 
-## Out of scope for Phase 2 MVP
+**Subject:** `Cohort PM: N due today, M overdue`
 
-- Per-assignment instant email (in-app bell covers this)
-- SMS or push notifications
-- User-configurable reminder preferences
+**Sections:** Overdue | Due today | Due tomorrow
 
-## Apply Phase 1 schema first
-
-Run `supabase/migrations/20260715_motivation_features.sql` in the Supabase SQL editor before deploying Phase 1 UI changes.
+**CTA:** `https://pm-joes9987.vercel.app/dashboard?filter=mine`

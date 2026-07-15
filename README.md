@@ -85,10 +85,15 @@ npm run dev
 - [x] **Progress page** — per-project completion bars, overdue counts, project deadline countdown
 - [x] **Project target dates** — optional project-level deadline for goal tracking
 - [x] **Quick filters** — My tasks, Overdue, Due this week
+- [x] **Email digests (Brevo)** — daily overdue/today/tomorrow reminders via Supabase Edge Function
+
+## Email digest setup
+
+See [docs/BREVO_EMAIL_SETUP.md](docs/BREVO_EMAIL_SETUP.md) for Brevo account, Edge Function deploy, and pg_cron schedule.
 
 ## Known limitations
 
-- Email digest reminders planned for Phase 2 — see [docs/PHASE2_EMAIL_REMINDERS.md](docs/PHASE2_EMAIL_REMINDERS.md)
+- Email digests require Brevo sender verification and Supabase Edge Function secrets (not auto-configured on clone)
 - No GitHub issue/PR linking yet
 - No review/vote module (planned differentiator for later projects)
 - Email confirmation may need to be disabled in Supabase for frictionless reviewer access
