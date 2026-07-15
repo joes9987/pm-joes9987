@@ -17,8 +17,9 @@ https://pm-joes9987.vercel.app
 ```
 Browser (React)
   → Supabase Auth (email/password, cookie session via @supabase/ssr)
-  → Postgres (profiles, projects, tasks)
+  → Postgres (profiles, projects, tasks, notifications)
   → Row Level Security policies for authenticated cohort access
+  → DB triggers for assignment/completion notifications
 ```
 
 ### Data model
@@ -26,8 +27,9 @@ Browser (React)
 | Table | Purpose |
 |-------|---------|
 | `profiles` | Cohort member display name + email (auto-created on signup) |
-| `projects` | Named workspaces with archive flag |
-| `tasks` | Title, description, status (`todo` / `in_progress` / `done`), assignee |
+| `projects` | Named workspaces with archive flag and optional `target_date` |
+| `tasks` | Title, description, status, assignee, optional `due_date` |
+| `notifications` | In-app alerts (assigned, due soon, overdue, completed) |
 
 ## Setup (fresh clone)
 
@@ -39,7 +41,9 @@ cd pm-joes9987
 npm install
 ```
 
-2. Create a Supabase project (or use an existing one) and run `supabase/schema.sql` in the SQL editor.
+2. Create a Supabase project (or use an existing one) and run:
+   - `supabase/schema.sql` for fresh installs, **or**
+   - `supabase/migrations/20260715_motivation_features.sql` if upgrading an existing database
 
 3. Copy env template:
 
@@ -62,7 +66,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 npm run dev
 ```
 
-7. Sign up, create a project, create and assign a task.
+7. Sign up, create a project (optionally set a target deadline), create and assign a task with a due date.
 
 ## Baseline features
 
@@ -73,16 +77,25 @@ npm run dev
 - [x] Filter tasks by project, status, assignee
 - [x] Public HTTPS deployment target (Vercel)
 
+## Differentiating features (motivation)
+
+- [x] **Due dates** on tasks with urgency badges (overdue, due today, due soon)
+- [x] **In-app notifications** on assignment, deadline proximity, and task completion
+- [x] **Motivation dashboard** — Focus today, weekly due count, completion and on-time rates
+- [x] **Progress page** — per-project completion bars, overdue counts, project deadline countdown
+- [x] **Project target dates** — optional project-level deadline for goal tracking
+- [x] **Quick filters** — My tasks, Overdue, Due this week
+
 ## Known limitations
 
-- No email notifications or due dates (differentiator backlog)
+- Email digest reminders planned for Phase 2 — see [docs/PHASE2_EMAIL_REMINDERS.md](docs/PHASE2_EMAIL_REMINDERS.md)
 - No GitHub issue/PR linking yet
 - No review/vote module (planned differentiator for later projects)
 - Email confirmation may need to be disabled in Supabase for frictionless reviewer access
 
 ## Agent usage
 
-Built with Cursor Agent: scaffolded Next.js app, implemented Supabase schema + RLS, auth flows, project/task UI, and deployment docs. QA via fresh-clone setup checklist and auth smoke path.
+Built with Cursor Agent: scaffolded Next.js app, implemented Supabase schema + RLS, auth flows, project/task UI, motivation features (due dates, notifications, progress metrics), and deployment docs.
 
 ## License
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { formatProjectCountdown, fromDatetimeLocalValue } from '@/lib/task-deadlines'
 import type { Project } from '@/lib/types'
 
 const fieldClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100'
@@ -19,6 +20,7 @@ export function ProjectManager ({
   const [projects, setProjects] = useState(initialProjects)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [targetDate, setTargetDate] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -32,7 +34,12 @@ export function ProjectManager ({
     const supabase = createClient()
     const { data, error: insertError } = await supabase
       .from('projects')
-      .insert({ name, description, owner_id: userId })
+      .insert({
+        name,
+        description,
+        owner_id: userId,
+        target_date: fromDatetimeLocalValue(targetDate)
+      })
       .select('*')
       .single()
 
@@ -46,6 +53,7 @@ export function ProjectManager ({
     setProjects((prev) => [data as Project, ...prev])
     setName('')
     setDescription('')
+    setTargetDate('')
     setSuccess(`Project "${(data as Project).name}" created. You can now add tasks on the dashboard.`)
     router.refresh()
   }
@@ -79,6 +87,16 @@ export function ProjectManager ({
               className={fieldClass}
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+            />
+          </label>
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Target deadline (optional)
+            <input
+              type="datetime-local"
+              className={fieldClass}
+              value={targetDate}
+              onChange={(e) => setTargetDate(e.target.value)}
               disabled={loading}
             />
           </label>
@@ -117,24 +135,37 @@ export function ProjectManager ({
           {projects.length === 0 && (
             <li className="py-6 text-sm text-zinc-500 dark:text-zinc-400">No projects yet.</li>
           )}
-          {projects.map((project) => (
-            <li key={project.id} className="flex items-center justify-between py-4">
-              <div>
-                <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {project.name}
-                  {project.archived && <span className="ml-2 text-xs text-amber-700 dark:text-amber-400">(archived)</span>}
-                </p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-300">{project.description || 'No description'}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => toggleArchive(project)}
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600"
-              >
-                {project.archived ? 'Restore' : 'Archive'}
-              </button>
-            </li>
-          ))}
+          {projects.map((project) => {
+            const countdown = formatProjectCountdown(project.target_date)
+
+            return (
+              <li key={project.id} className="flex items-center justify-between gap-4 py-4">
+                <div>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {project.name}
+                    {project.archived && <span className="ml-2 text-xs text-amber-700 dark:text-amber-400">(archived)</span>}
+                  </p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-300">{project.description || 'No description'}</p>
+                  {countdown && (
+                    <p className={`mt-1 text-xs font-medium ${
+                      countdown.includes('past deadline')
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-blue-700 dark:text-blue-300'
+                    }`}>
+                      {countdown}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleArchive(project)}
+                  className="shrink-0 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600"
+                >
+                  {project.archived ? 'Restore' : 'Archive'}
+                </button>
+              </li>
+            )
+          })}
         </ul>
       </section>
     </div>

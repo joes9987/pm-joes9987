@@ -16,6 +16,7 @@ create table if not exists public.projects (
   description text not null default '',
   owner_id uuid not null references public.profiles (id) on delete cascade,
   archived boolean not null default false,
+  target_date timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -41,6 +42,7 @@ create index if not exists tasks_status_idx on public.tasks (status);
 alter table public.profiles enable row level security;
 alter table public.projects enable row level security;
 alter table public.tasks enable row level security;
+alter table public.notifications enable row level security;
 
 create policy "Profiles are readable by authenticated users"
   on public.profiles for select to authenticated using (true);
@@ -76,6 +78,82 @@ create policy "Task creators and assignees can update tasks"
   using (auth.uid() = created_by or auth.uid() = assignee_id or auth.uid() in (
     select owner_id from public.projects where id = project_id
   ));
+
+create policy "Users can read own notifications"
+  on public.notifications for select to authenticated
+  using (auth.uid() = user_id);
+
+create policy "Users can update own notifications"
+  on public.notifications for update to authenticated
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own notifications"
+  on public.notifications for insert to authenticated
+  with check (auth.uid() = user_id);
+
+create or replace function public.notify_task_assignment()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.assignee_id is not null
+    and (tg_op = 'INSERT' or new.assignee_id is distinct from old.assignee_id)
+  then
+    insert into public.notifications (user_id, type, task_id, message)
+    values (
+      new.assignee_id,
+      'assigned',
+      new.id,
+      'You were assigned: ' || new.title
+    )
+    on conflict (user_id, task_id, type) do update
+      set message = excluded.message,
+          read_at = null,
+          created_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+create or replace function public.notify_task_completed()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status = 'done'
+    and old.status is distinct from 'done'
+    and new.created_by is not null
+    and new.created_by is distinct from auth.uid()
+  then
+    insert into public.notifications (user_id, type, task_id, message)
+    values (
+      new.created_by,
+      'completed',
+      new.id,
+      'Task completed: ' || new.title
+    )
+    on conflict (user_id, task_id, type) do update
+      set message = excluded.message,
+          read_at = null,
+          created_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_task_assignment_notify on public.tasks;
+create trigger on_task_assignment_notify
+  after insert or update of assignee_id on public.tasks
+  for each row execute function public.notify_task_assignment();
+
+drop trigger if exists on_task_completed_notify on public.tasks;
+create trigger on_task_completed_notify
+  after update of status on public.tasks
+  for each row execute function public.notify_task_completed();
 
 create or replace function public.handle_new_user()
 returns trigger
