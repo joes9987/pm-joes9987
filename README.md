@@ -43,9 +43,9 @@ npm install
 
 2. Create a Supabase project (or use an existing one) and run:
    - `supabase/schema.sql` for fresh installs, **or**
-   - `supabase/migrations/20260715_motivation_features.sql` if upgrading an existing database
+   - apply migrations in order if upgrading an existing database
 
-3. Copy env template:
+3. Copy the committed env template:
 
 ```bash
 cp .env.example .env.local
@@ -66,13 +66,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 npm run dev
 ```
 
-7. Sign up, create a project (optionally set a target deadline), create and assign a task with a due date.
+7. Sign up, create a project (optionally set a target deadline), create and assign a task with a due date. Edit projects and reassign tasks after creation on **Projects** and **Dashboard**.
 
 ## Baseline features
 
 - [x] Email/password auth (30+ accounts)
-- [x] Projects: create, edit (description), archive/restore
-- [x] Tasks: title, description, status workflow (3 states)
+- [x] Projects: create, edit (name, description, target date), archive/restore
+- [x] Tasks: title, description, status workflow (3 states); edit and reassign after creation
 - [x] Assign tasks to any cohort member
 - [x] Filter tasks by project, status, assignee
 - [x] Public HTTPS deployment target (Vercel)
@@ -100,7 +100,7 @@ See [docs/BREVO_EMAIL_SETUP.md](docs/BREVO_EMAIL_SETUP.md) for Brevo account, Ed
 
 ## Agent usage
 
-Built with Cursor Agent: scaffolded Next.js app, implemented Supabase schema + RLS, auth flows, project/task UI, motivation features (due dates, notifications, progress metrics), and deployment docs.
+Built with Cursor Agent: scaffolded Next.js app, implemented Supabase schema + RLS (including UPDATE policy hardening), auth flows, project/task UI with post-creation edit, motivation features (due dates, notifications, progress metrics), Brevo email digests, and deployment docs.
 
 ## License
 
