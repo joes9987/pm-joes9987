@@ -1,11 +1,13 @@
 import { redirect } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { Leaderboard } from '@/components/Leaderboard'
 import { MotivationPanel } from '@/components/MotivationPanel'
 import { TaskBoard } from '@/components/TaskBoard'
+import { aggregateLeaderboard } from '@/lib/leaderboard'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 import type { QuickFilter } from '@/lib/task-deadlines'
-import type { Profile, Project, Task } from '@/lib/types'
+import type { PointEvent, Profile, Project, Task } from '@/lib/types'
 import { ui } from '@/lib/ui'
 
 type DashboardPageProps = {
@@ -40,13 +42,16 @@ export default async function DashboardPage ({ searchParams }: DashboardPageProp
   const quickFilter = parseQuickFilter(params.filter)
   const highlightTaskId = params.taskId
 
-  const [{ data: projects }, { data: tasks }, { data: members }] = await Promise.all([
+  const [{ data: projects }, { data: tasks }, { data: members }, { data: pointEvents }] = await Promise.all([
     supabase.from('projects').select('*').eq('archived', false).order('created_at', { ascending: false }),
     supabase.from('tasks').select('*').order('created_at', { ascending: false }),
-    supabase.from('profiles').select('*').order('display_name')
+    supabase.from('profiles').select('*').order('display_name'),
+    supabase.from('point_events').select('*')
   ])
 
   const taskList = (tasks ?? []) as Task[]
+  const profileList = (members ?? []) as Profile[]
+  const leaderboardRows = aggregateLeaderboard((pointEvents ?? []) as PointEvent[], profileList)
 
   return (
     <AppShell>
@@ -59,10 +64,17 @@ export default async function DashboardPage ({ searchParams }: DashboardPageProp
         <div className="mb-6">
           <MotivationPanel tasks={taskList} currentUserId={user.id} />
         </div>
+        <div className="mb-6">
+          <Leaderboard
+            initialRows={leaderboardRows}
+            profiles={profileList}
+            currentUserId={user.id}
+          />
+        </div>
         <TaskBoard
           initialTasks={taskList}
           projects={(projects ?? []) as Project[]}
-          members={(members ?? []) as Profile[]}
+          members={profileList}
           currentUserId={user.id}
           initialQuickFilter={quickFilter}
           highlightTaskId={highlightTaskId}

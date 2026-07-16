@@ -1,5 +1,7 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'done'
 
+export type TaskDifficulty = 'low' | 'mid' | 'high'
+
 export type NotificationType = 'assigned' | 'due_soon' | 'overdue' | 'completed'
 
 export type Profile = {
@@ -25,11 +27,21 @@ export type Task = {
   title: string
   description: string
   status: TaskStatus
+  difficulty: TaskDifficulty
   assignee_id: string | null
   created_by: string
   due_date: string | null
   created_at: string
   updated_at: string
+}
+
+export type PointEvent = {
+  id: string
+  user_id: string
+  task_id: string
+  points: number
+  difficulty: TaskDifficulty
+  awarded_at: string
 }
 
 export type Notification = {
@@ -44,6 +56,18 @@ export type Notification = {
 
 export const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done']
 
+export const TASK_DIFFICULTIES: TaskDifficulty[] = ['low', 'mid', 'high']
+
+export const DIFFICULTY_POINTS: Record<TaskDifficulty, number> = {
+  low: 10,
+  mid: 25,
+  high: 50
+}
+
 export function formatStatus (status: TaskStatus): string {
   return status.replace('_', ' ')
+}
+
+export function formatDifficulty (difficulty: TaskDifficulty): string {
+  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
 }

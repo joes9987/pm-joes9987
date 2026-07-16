@@ -17,7 +17,18 @@ import {
   type QuickFilter
 } from '@/lib/task-deadlines'
 import { ui } from '@/lib/ui'
-import { formatStatus, TASK_STATUSES, type Profile, type Project, type Task, type TaskStatus } from '@/lib/types'
+import {
+  DIFFICULTY_POINTS,
+  formatDifficulty,
+  formatStatus,
+  TASK_DIFFICULTIES,
+  TASK_STATUSES,
+  type Profile,
+  type Project,
+  type Task,
+  type TaskDifficulty,
+  type TaskStatus
+} from '@/lib/types'
 
 const fieldClass = ui.field
 const selectClass = ui.field
@@ -49,6 +60,7 @@ export function TaskBoard ({
   const [description, setDescription] = useState('')
   const [projectId, setProjectId] = useState('')
   const [assigneeId, setAssigneeId] = useState<string>('')
+  const [difficulty, setDifficulty] = useState<TaskDifficulty>('low')
   const [dueDate, setDueDate] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -58,6 +70,7 @@ export function TaskBoard ({
   const [editDescription, setEditDescription] = useState('')
   const [editProjectId, setEditProjectId] = useState('')
   const [editAssigneeId, setEditAssigneeId] = useState('')
+  const [editDifficulty, setEditDifficulty] = useState<TaskDifficulty>('low')
   const [editDueDate, setEditDueDate] = useState('')
   const [editLoading, setEditLoading] = useState(false)
   const highlightRef = useRef<HTMLLIElement | null>(null)
@@ -127,6 +140,7 @@ export function TaskBoard ({
         title,
         description,
         status: 'todo',
+        difficulty,
         assignee_id: assigneeId || null,
         created_by: currentUserId,
         due_date: fromDatetimeLocalValue(dueDate)
@@ -145,6 +159,7 @@ export function TaskBoard ({
     setTitle('')
     setDescription('')
     setAssigneeId('')
+    setDifficulty('low')
     setDueDate('')
   }
 
@@ -189,6 +204,7 @@ export function TaskBoard ({
     setEditDescription(task.description)
     setEditProjectId(task.project_id)
     setEditAssigneeId(task.assignee_id ?? '')
+    setEditDifficulty(task.difficulty ?? 'low')
     setEditDueDate(toDatetimeLocalValue(task.due_date))
     setError(null)
   }
@@ -199,6 +215,7 @@ export function TaskBoard ({
     setEditDescription('')
     setEditProjectId('')
     setEditAssigneeId('')
+    setEditDifficulty('low')
     setEditDueDate('')
   }
 
@@ -219,6 +236,7 @@ export function TaskBoard ({
         description: editDescription,
         project_id: editProjectId,
         assignee_id: editAssigneeId || null,
+        difficulty: editDifficulty,
         due_date: fromDatetimeLocalValue(editDueDate),
         updated_at: new Date().toISOString()
       })
@@ -325,7 +343,22 @@ export function TaskBoard ({
               ))}
             </select>
           </label>
-          <label className={`${ui.label} md:col-span-2`}>
+          <label className={ui.label}>
+            Difficulty
+            <select
+              className={selectClass}
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value as TaskDifficulty)}
+              disabled={activeProjects.length === 0 || loading}
+            >
+              {TASK_DIFFICULTIES.map((level) => (
+                <option key={level} value={level}>
+                  {formatDifficulty(level)} ({DIFFICULTY_POINTS[level]} pts)
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={ui.label}>
             Due date (optional)
             <input
               type="datetime-local"
@@ -488,7 +521,22 @@ export function TaskBoard ({
                         ))}
                       </select>
                     </label>
-                    <label className={`${ui.label} md:col-span-2`}>
+                    <label className={ui.label}>
+                      Difficulty
+                      <select
+                        className={selectClass}
+                        value={editDifficulty}
+                        onChange={(e) => setEditDifficulty(e.target.value as TaskDifficulty)}
+                        disabled={editLoading}
+                      >
+                        {TASK_DIFFICULTIES.map((level) => (
+                          <option key={level} value={level}>
+                            {formatDifficulty(level)} ({DIFFICULTY_POINTS[level]} pts)
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className={ui.label}>
                       Due date (optional)
                       <input
                         type="datetime-local"
@@ -517,6 +565,9 @@ export function TaskBoard ({
                             {deadlineBadgeLabel(deadlineStatus)}
                           </span>
                         )}
+                        <span className="rounded-full bg-[var(--nav-active)] px-2 py-0.5 text-xs font-medium text-[var(--nav-active-fg)]">
+                          {formatDifficulty(task.difficulty ?? 'low')} · {DIFFICULTY_POINTS[task.difficulty ?? 'low']} pts
+                        </span>
                       </div>
                       <p className="text-sm text-[var(--muted-foreground)]">{task.description || 'No description'}</p>
                       <p className="mt-1 text-xs text-[var(--muted)]">

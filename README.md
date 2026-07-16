@@ -86,10 +86,15 @@ npm run dev
 - [x] **Project target dates** — optional project-level deadline for goal tracking
 - [x] **Quick filters** — My tasks, Overdue, Due this week
 - [x] **Email digests (Brevo)** — daily overdue/today/tomorrow reminders via Supabase Edge Function
+- [x] **Difficulty points + leaderboard** — Low/Mid/High (10/25/50 pts) on complete; live dashboard leaderboard; weekly top-3 kudos email
 
 ## Email digest setup
 
 See [docs/BREVO_EMAIL_SETUP.md](docs/BREVO_EMAIL_SETUP.md) for Brevo account, Edge Function deploy, and pg_cron schedule.
+
+## Leaderboard setup
+
+See [docs/LEADERBOARD.md](docs/LEADERBOARD.md) for difficulty scoring, Realtime leaderboard, and weekly kudos emails.
 
 ## Known limitations
 

@@ -2,6 +2,8 @@
 
 Daily deadline reminder emails via **Supabase Edge Function + Brevo API + pg_cron**.
 
+Weekly leaderboard kudos (top 3) use the same Brevo secrets — see [LEADERBOARD.md](./LEADERBOARD.md).
+
 ## Architecture
 
 ```
