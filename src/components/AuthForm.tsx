@@ -85,6 +85,11 @@ export function AuthForm ({ mode }: { mode: 'login' | 'signup' }) {
           onChange={(e) => setPassword(e.target.value)}
         />
       </label>
+      {mode === 'login' && (
+        <p className="text-right text-sm">
+          <Link href="/forgot-password" className={ui.linkAccent}>Forgot password?</Link>
+        </p>
+      )}
       {error && <p className={ui.alertError}>{error}</p>}
       <button type="submit" disabled={loading} className={`w-full ${ui.btnPrimary}`}>
         {loading ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
