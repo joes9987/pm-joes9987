@@ -40,7 +40,7 @@ Generate a random cron secret (e.g. `openssl rand -hex 32` or any long random st
 supabase secrets set `
   BREVO_API_KEY="xkeysib-..." `
   BREVO_SENDER_EMAIL="noreply@yourdomain.com" `
-  BREVO_SENDER_NAME="Cohort PM" `
+  BREVO_SENDER_NAME="EudaPM" `
   CRON_SECRET="your-long-random-secret" `
   APP_URL="https://pm-joes9987.vercel.app"
 ```
@@ -112,7 +112,7 @@ Check Edge Function logs in Supabase Dashboard → **Edge Functions → send-dea
 |--------|----------|---------|
 | `BREVO_API_KEY` | Yes | Brevo transactional API key |
 | `BREVO_SENDER_EMAIL` | Yes | Verified sender address in Brevo |
-| `BREVO_SENDER_NAME` | No | Display name (default: Cohort PM) |
+| `BREVO_SENDER_NAME` | No | Display name (default: EudaPM) |
 | `CRON_SECRET` | Yes | Auth header for cron + manual triggers |
 | `APP_URL` | No | Dashboard link in email (default: production URL) |
 

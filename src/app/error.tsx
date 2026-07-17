@@ -1,0 +1,27 @@
+'use client'
+
+import { useEffect } from 'react'
+import { ui } from '@/lib/ui'
+
+type ErrorPageProps = {
+  error: Error & { digest?: string }
+  reset: () => void
+}
+
+export default function ErrorPage ({ error, reset }: ErrorPageProps) {
+  useEffect(() => {
+    console.error(error)
+  }, [error])
+
+  return (
+    <main className={`${ui.meshBg} mx-auto max-w-3xl px-4 py-16`}>
+      <h1 className={ui.pageTitle}>Something went wrong</h1>
+      <p className={`mt-2 ${ui.pageSubtitle}`}>
+        Try again. If this keeps happening, refresh the page.
+      </p>
+      <button type="button" onClick={reset} className={`${ui.btnPrimary} mt-6`}>
+        Retry
+      </button>
+    </main>
+  )
+}

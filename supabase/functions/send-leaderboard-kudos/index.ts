@@ -78,7 +78,7 @@ function buildKudosHtml (earner: TopEarner, podium: TopEarner[], weekLabel: stri
       <body style="margin:0;padding:0;background:#f7f5f2;font-family:Segoe UI,system-ui,sans-serif;color:#1c1917;">
         <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
           <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:16px;padding:28px;box-shadow:0 8px 24px rgba(79,70,229,0.08);">
-            <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#0d9488;">Cohort PM</p>
+            <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#0d9488;">EudaPM</p>
             <h1 style="margin:0 0 8px;font-size:24px;line-height:1.2;color:#312e81;">You're ${ordinal(earner.rank)} this week!</h1>
             <p style="margin:0 0 16px;color:#57534e;">
               Hi ${escapeHtml(earner.profile.display_name)}, you earned <strong>${earner.points}</strong> points
@@ -90,7 +90,7 @@ function buildKudosHtml (earner: TopEarner, podium: TopEarner[], weekLabel: stri
               View leaderboard
             </a>
           </div>
-          <p style="margin:16px 0 0;text-align:center;font-size:12px;color:#78716c;">Weekly kudos from Cohort PM · Hult Cohort Project 1</p>
+          <p style="margin:16px 0 0;text-align:center;font-size:12px;color:#78716c;">Weekly kudos from EudaPM · Hult Cohort Project 1</p>
         </div>
       </body>
     </html>
@@ -144,7 +144,7 @@ Deno.serve(async (request) => {
 
   const brevoApiKey = Deno.env.get('BREVO_API_KEY')
   const senderEmail = Deno.env.get('BREVO_SENDER_EMAIL')
-  const senderName = Deno.env.get('BREVO_SENDER_NAME') ?? 'Cohort PM'
+  const senderName = Deno.env.get('BREVO_SENDER_NAME') ?? 'EudaPM'
   const appUrl = Deno.env.get('APP_URL') ?? 'https://pm-joes9987.vercel.app'
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -245,7 +245,7 @@ Deno.serve(async (request) => {
         senderName,
         toEmail: earner.profile.email,
         toName: earner.profile.display_name,
-        subject: `Cohort PM: You're ${ordinal(earner.rank)} on the weekly leaderboard!`,
+        subject: `EudaPM: You're ${ordinal(earner.rank)} on the weekly leaderboard!`,
         html: buildKudosHtml(earner, podium, weekLabel, appUrl)
       })
       sent += 1

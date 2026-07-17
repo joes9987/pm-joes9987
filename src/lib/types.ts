@@ -31,6 +31,7 @@ export type Task = {
   assignee_id: string | null
   created_by: string
   due_date: string | null
+  deleted_at?: string | null
   created_at: string
   updated_at: string
 }
@@ -42,6 +43,14 @@ export type PointEvent = {
   points: number
   difficulty: TaskDifficulty
   awarded_at: string
+}
+
+export type TaskComment = {
+  id: string
+  task_id: string
+  author_id: string
+  body: string
+  created_at: string
 }
 
 export type Notification = {

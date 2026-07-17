@@ -20,8 +20,44 @@ export function NotificationBell ({ userId, initialNotifications }: Notification
   const unreadCount = notifications.filter((item) => !item.read_at).length
 
   useEffect(() => {
-    setNotifications(initialNotifications)
-  }, [initialNotifications])
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`notifications-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const row = payload.new as Notification
+            setNotifications((prev) => (prev.some((item) => item.id === row.id) ? prev : [row, ...prev]))
+            return
+          }
+          if (payload.eventType === 'UPDATE') {
+            const row = payload.new as Notification
+            setNotifications((prev) => {
+              const exists = prev.some((item) => item.id === row.id)
+              if (!exists) return [row, ...prev]
+              return prev.map((item) => (item.id === row.id ? row : item))
+            })
+            return
+          }
+          if (payload.eventType === 'DELETE') {
+            const row = payload.old as Notification
+            setNotifications((prev) => prev.filter((item) => item.id !== row.id))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [userId])
 
   useEffect(() => {
     function handleClickOutside (event: MouseEvent) {
@@ -114,14 +150,14 @@ export function NotificationBell ({ userId, initialNotifications }: Notification
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm text-[var(--foreground)]">{notification.message}</p>
-                    <p className="mt-1 text-xs text-[var(--muted)]">
+                    <p className="mt-1 font-mono text-xs text-[var(--muted)]">
                       {formatRelativeTime(notification.created_at)}
                     </p>
                     {notification.task_id && (
                       <Link
                         href={`/dashboard?taskId=${notification.task_id}`}
                         onClick={() => {
-                          if (!notification.read_at) markRead(notification.id)
+                          if (!notification.read_at) void markRead(notification.id)
                           setOpen(false)
                         }}
                         className={`mt-2 inline-block text-xs ${ui.linkAccent}`}
@@ -133,7 +169,7 @@ export function NotificationBell ({ userId, initialNotifications }: Notification
                   {!notification.read_at && (
                     <button
                       type="button"
-                      onClick={() => markRead(notification.id)}
+                      onClick={() => void markRead(notification.id)}
                       className="shrink-0 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
                     >
                       Mark read

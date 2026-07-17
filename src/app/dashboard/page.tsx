@@ -1,13 +1,12 @@
 import { redirect } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
-import { Leaderboard } from '@/components/Leaderboard'
 import { MotivationPanel } from '@/components/MotivationPanel'
 import { TaskBoard } from '@/components/TaskBoard'
-import { aggregateLeaderboard } from '@/lib/leaderboard'
+import { syncDeadlineNotifications } from '@/lib/notifications'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 import type { QuickFilter } from '@/lib/task-deadlines'
-import type { PointEvent, Profile, Project, Task } from '@/lib/types'
+import type { Profile, Project, Task } from '@/lib/types'
 import { ui } from '@/lib/ui'
 
 type DashboardPageProps = {
@@ -25,9 +24,9 @@ function parseQuickFilter (value: string | undefined): QuickFilter {
 export default async function DashboardPage ({ searchParams }: DashboardPageProps) {
   if (!isSupabaseConfigured()) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16">
-        <h1 className="text-2xl font-semibold">Dashboard unavailable</h1>
-        <p className="mt-2 text-sm text-zinc-600">Configure Supabase environment variables to enable auth and data.</p>
+      <main className={`${ui.meshBg} mx-auto max-w-3xl px-4 py-16`}>
+        <h1 className={ui.pageTitle}>Dashboard unavailable</h1>
+        <p className={`mt-2 ${ui.pageSubtitle}`}>Configure Supabase environment variables to enable auth and data.</p>
       </main>
     )
   }
@@ -42,34 +41,31 @@ export default async function DashboardPage ({ searchParams }: DashboardPageProp
   const quickFilter = parseQuickFilter(params.filter)
   const highlightTaskId = params.taskId
 
-  const [{ data: projects }, { data: tasks }, { data: members }, { data: pointEvents }] = await Promise.all([
+  const [{ data: projects }, { data: tasks }, { data: members }] = await Promise.all([
     supabase.from('projects').select('*').eq('archived', false).order('created_at', { ascending: false }),
-    supabase.from('tasks').select('*').order('created_at', { ascending: false }),
-    supabase.from('profiles').select('*').order('display_name'),
-    supabase.from('point_events').select('*')
+    supabase.from('tasks').select('*').is('deleted_at', null).order('created_at', { ascending: false }),
+    supabase.from('profiles').select('id, email, display_name').order('display_name')
   ])
 
   const taskList = (tasks ?? []) as Task[]
   const profileList = (members ?? []) as Profile[]
-  const leaderboardRows = aggregateLeaderboard((pointEvents ?? []) as PointEvent[], profileList)
+
+  // Throttle: sync deadline notifications on dashboard visits only (not every AppShell nav).
+  await syncDeadlineNotifications(
+    supabase,
+    user.id,
+    taskList.filter((task) => task.assignee_id === user.id)
+  )
 
   return (
     <AppShell>
       <main className={ui.pageMain}>
-        <div className="mb-6 animate-fade-up">
-          <p className={ui.eyebrow}>Your workspace</p>
+        <div className="mb-4 animate-fade-up">
+          <p className={ui.eyebrow}>Workspace</p>
           <h1 className={`${ui.pageTitle} mt-1`}>Dashboard</h1>
-          <p className={`${ui.pageSubtitle} mt-1`}>Manage tasks across cohort projects.</p>
         </div>
-        <div className="mb-6">
+        <div className="mb-4">
           <MotivationPanel tasks={taskList} currentUserId={user.id} />
-        </div>
-        <div className="mb-6">
-          <Leaderboard
-            initialRows={leaderboardRows}
-            profiles={profileList}
-            currentUserId={user.id}
-          />
         </div>
         <TaskBoard
           initialTasks={taskList}

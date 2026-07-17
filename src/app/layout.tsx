@@ -1,21 +1,29 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { IBM_Plex_Mono, IBM_Plex_Sans, Syne } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin']
+const syne = Syne({
+  variable: '--font-syne',
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800']
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin']
+const plexSans = IBM_Plex_Sans({
+  variable: '--font-plex-sans',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700']
+})
+
+const plexMono = IBM_Plex_Mono({
+  variable: '--font-plex-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '600']
 })
 
 export const metadata: Metadata = {
-  title: 'Cohort PM — joes9987',
-  description: 'Project management platform for Hult Cohort Summer Pilot 2026'
+  title: 'EudaPM — joes9987',
+  description: 'Futuristic project management for cohort teams — tasks, deadlines, and momentum.'
 }
 
 export default function RootLayout ({
@@ -25,7 +33,7 @@ export default function RootLayout ({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}>
+      <body className={`${syne.variable} ${plexSans.variable} ${plexMono.variable} min-h-screen antialiased`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

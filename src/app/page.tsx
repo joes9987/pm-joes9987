@@ -22,19 +22,18 @@ export default async function HomePage () {
 
       <div className="mx-auto w-full max-w-3xl">
         {!isSupabaseConfigured() && (
-          <p className={`${ui.alertWarning} mb-6 animate-fade-up`}>
+          <p className={`${ui.alertWarning} mb-6 animate-fade-up`} role="alert">
             Backend pending: add Supabase env vars in Vercel and run `supabase/schema.sql`.
           </p>
         )}
 
         <div className="animate-fade-up">
-          <span className="brand-mark mb-4">PM</span>
-          <p className={ui.eyebrow}>Hult Cohort · Project 1</p>
-          <h1 className="mt-3 text-5xl font-bold tracking-tight">
-            <span className="text-gradient">Cohort PM</span>
+          <span className="brand-mark mb-5">EP</span>
+          <h1 className="font-display mt-2 text-5xl font-extrabold tracking-tight sm:text-6xl">
+            <span className="text-gradient">EudaPM</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--muted-foreground)]">
-            A lightweight project management platform for 30+ cohort members — projects, tasks, deadlines, and progress in one place.
+          <p className="mt-4 max-w-lg text-lg leading-relaxed text-[var(--muted-foreground)]">
+            Plan work. Earn momentum.
           </p>
         </div>
 
@@ -47,21 +46,18 @@ export default async function HomePage () {
           </Link>
         </div>
 
-        <div className="mt-12 grid gap-3 sm:grid-cols-2 animate-fade-up animate-fade-up-delay-2">
+        <ul className="mt-12 flex flex-col gap-2 text-sm text-[var(--muted-foreground)] animate-fade-up animate-fade-up-delay-2 sm:flex-row sm:flex-wrap sm:gap-x-8">
           {[
-            'Email/password auth for 30+ accounts',
-            'Projects with archive support',
-            'Due dates and in-app notifications',
-            'Progress metrics across projects'
+            'Deadlines & live notifications',
+            'Difficulty points & leaderboard',
+            'Search, comments, soft-delete'
           ].map((item) => (
-            <div key={item} className={`${ui.cardSm} flex items-start gap-3`}>
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-bold text-[var(--accent-foreground)]">
-                ✓
-              </span>
-              <span className="text-sm text-[var(--muted-foreground)]">{item}</span>
-            </div>
+            <li key={item} className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" aria-hidden />
+              {item}
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </main>
   )

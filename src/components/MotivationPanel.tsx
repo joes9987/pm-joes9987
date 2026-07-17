@@ -10,78 +10,40 @@ type MotivationPanelProps = {
   currentUserId: string
 }
 
-function MetricCard ({
-  title,
-  children,
-  accent = 'primary',
-  className = ''
-}: {
-  title: string
-  children: React.ReactNode
-  accent?: 'primary' | 'accent'
-  className?: string
-}) {
-  const accentColor = accent === 'accent' ? 'var(--accent)' : 'var(--primary)'
-
-  return (
-    <article
-      className={`${ui.cardSm} relative overflow-hidden ${className}`}
-      style={{ borderTopWidth: '3px', borderTopColor: accentColor }}
-    >
-      <h2 className={ui.metricLabel}>{title}</h2>
-      {children}
-    </article>
-  )
-}
-
 export function MotivationPanel ({ tasks, currentUserId }: MotivationPanelProps) {
   const metrics = computePersonalMetrics(tasks, currentUserId)
+  const focusLabel = metrics.focusToday.length === 0
+    ? 'Caught up'
+    : metrics.focusToday.slice(0, 2).map((task) => task.title).join(' · ')
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <MetricCard title="Focus today" accent="accent" className="md:col-span-2 xl:col-span-2">
+    <section className={`${ui.cardSm} flex flex-wrap items-stretch gap-4 md:gap-6`} aria-label="Personal metrics">
+      <div className="min-w-[10rem] flex-1">
+        <p className={ui.metricLabel}>Focus today</p>
         {metrics.focusToday.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-            No overdue or due-today tasks assigned to you. You are caught up.
-          </p>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">No urgent assigned tasks</p>
         ) : (
-          <ul className="mt-3 space-y-2">
-            {metrics.focusToday.map((task) => (
-              <li key={task.id}>
-                <Link
-                  href={`/dashboard?taskId=${task.id}`}
-                  className="block rounded-xl border border-[var(--border)] bg-[var(--card-solid)] px-3 py-2.5 text-sm transition hover:border-[var(--primary)] hover:shadow-sm"
-                >
-                  <span className="font-medium text-[var(--foreground)]">{task.title}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-1 truncate text-sm font-medium text-[var(--foreground)]">
+            <Link href={`/dashboard?taskId=${metrics.focusToday[0].id}`} className={ui.linkAccent}>
+              {focusLabel}
+            </Link>
+          </p>
         )}
-      </MetricCard>
-
-      <MetricCard title="This week">
-        <p className={ui.metricValue}>{metrics.dueThisWeekCount}</p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          open task{metrics.dueThisWeekCount === 1 ? '' : 's'} due in the next 7 days
+      </div>
+      <div className="min-w-[6rem]">
+        <p className={ui.metricLabel}>This week</p>
+        <p className={`${ui.metricValue} text-2xl`}>{metrics.dueThisWeekCount}</p>
+      </div>
+      <div className="min-w-[6rem]">
+        <p className={ui.metricLabel}>Completion</p>
+        <p className={`${ui.metricValue} text-2xl`}>{metrics.completionRate}%</p>
+      </div>
+      <div className="min-w-[6rem]">
+        <p className={ui.metricLabel}>On-time</p>
+        <p className={`${ui.metricValue} text-2xl`}>
+          {metrics.onTimeRate === null ? '—' : `${metrics.onTimeRate}%`}
         </p>
-      </MetricCard>
-
-      <MetricCard title="Completion rate" accent="accent">
-        <p className={ui.metricValue}>{metrics.completionRate}%</p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          of your assigned tasks are done
-        </p>
-      </MetricCard>
-
-      <MetricCard title="On-time rate" className="md:col-span-2 xl:col-span-2">
-        <p className={ui.metricValue}>{metrics.onTimeRate === null ? '—' : `${metrics.onTimeRate}%`}</p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          {metrics.onTimeRate === null
-            ? 'Complete tasks with due dates to track on-time delivery.'
-            : 'of completed tasks with due dates finished on time'}
-        </p>
-      </MetricCard>
+      </div>
     </section>
   )
 }

@@ -48,7 +48,7 @@ flowchart LR
 
 ## Email content
 
-**Subject:** `Cohort PM: N due today, M overdue`
+**Subject:** `EudaPM: N due today, M overdue`
 
 **Sections:** Overdue | Due today | Due tomorrow
 

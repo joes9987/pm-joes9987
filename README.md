@@ -1,6 +1,8 @@
-# Cohort PM — @joes9987
+# EudaPM — @joes9987
 
 Project 1 submission for the Hult Cohort Summer Pilot 2026: a production project management platform for 30+ cohort members.
+
+**Product name:** EudaPM (repo / Vercel hostname remain `pm-joes9987`).
 
 ## Production URL
 
@@ -9,17 +11,19 @@ https://pm-joes9987.vercel.app
 ## Stack
 
 - **Next.js 16** (App Router) on **Vercel**
-- **Supabase** (Auth + Postgres + RLS)
+- **Supabase** (Auth + Postgres + RLS + Realtime)
 - **TypeScript** + **Tailwind CSS**
+- **Brevo** for transactional email digests
 
 ## Architecture
 
 ```
 Browser (React)
   → Supabase Auth (email/password, cookie session via @supabase/ssr)
-  → Postgres (profiles, projects, tasks, notifications)
+  → Postgres (profiles, projects, tasks, task_comments, notifications, point_events)
   → Row Level Security policies for authenticated cohort access
-  → DB triggers for assignment/completion notifications
+  → Realtime on tasks, notifications, task_comments, point_events
+  → DB triggers for assignment/completion notifications + points
 ```
 
 ### Data model
@@ -28,8 +32,10 @@ Browser (React)
 |-------|---------|
 | `profiles` | Cohort member display name + email (auto-created on signup) |
 | `projects` | Named workspaces with archive flag and optional `target_date` |
-| `tasks` | Title, description, status, assignee, optional `due_date` |
+| `tasks` | Title, description, status, assignee, difficulty, optional `due_date`, soft-delete via `deleted_at` |
+| `task_comments` | Per-task activity thread |
 | `notifications` | In-app alerts (assigned, due soon, overdue, completed) |
+| `point_events` | Points awarded on task completion |
 
 ## Setup (fresh clone)
 
@@ -77,16 +83,19 @@ npm run dev
 - [x] Filter tasks by project, status, assignee
 - [x] Public HTTPS deployment target (Vercel)
 
-## Differentiating features (motivation)
+## Differentiating features
 
-- [x] **Due dates** on tasks with urgency badges (overdue, due today, due soon)
-- [x] **In-app notifications** on assignment, deadline proximity, and task completion
-- [x] **Motivation dashboard** — Focus today, weekly due count, completion and on-time rates
-- [x] **Progress page** — per-project completion bars, overdue counts, project deadline countdown
-- [x] **Project target dates** — optional project-level deadline for goal tracking
-- [x] **Quick filters** — My tasks, Overdue, Due this week
-- [x] **Email digests (Brevo)** — daily overdue/today/tomorrow reminders via Supabase Edge Function
-- [x] **Difficulty points + leaderboard** — Low/Mid/High (10/25/50 pts) on complete; live dashboard leaderboard; weekly top-3 kudos email
+- [x] **Due dates** with urgency badges (overdue, due today, due soon)
+- [x] **In-app notifications** + Realtime updates
+- [x] **Motivation strip** — Focus today, completion, on-time rates
+- [x] **Progress page** — per-project metrics + live leaderboard
+- [x] **Difficulty points + leaderboard** — Low/Mid/High (10/25/50 pts); weekly top-3 kudos email
+- [x] **Email digests (Brevo)** — daily overdue/today/tomorrow reminders
+- [x] **Global search** — tasks + projects (`/search`)
+- [x] **Task comments** — threaded activity under each task
+- [x] **Soft-delete tasks** — delete/restore with “Show deleted”
+- [x] **Profile settings** — display name (`/settings`)
+- [x] **Live TaskBoard** — Realtime merges for insert/update/delete
 
 ## Email digest setup
 
@@ -101,11 +110,12 @@ See [docs/LEADERBOARD.md](docs/LEADERBOARD.md) for difficulty scoring, Realtime 
 - Email digests require Brevo sender verification and Supabase Edge Function secrets (not auto-configured on clone)
 - No GitHub issue/PR linking yet
 - No review/vote module (planned differentiator for later projects)
+- No invite-only signup / Kanban / calendar views yet
 - Email confirmation may need to be disabled in Supabase for frictionless reviewer access
 
 ## Agent usage
 
-Built with Cursor Agent: scaffolded Next.js app, implemented Supabase schema + RLS (including UPDATE policy hardening), auth flows, project/task UI with post-creation edit, motivation features (due dates, notifications, progress metrics), Brevo email digests, and deployment docs.
+Built with Cursor Agent: scaffolded Next.js app, implemented Supabase schema + RLS, auth flows, project/task UI, motivation features, Brevo digests, gamification, and the EudaPM product pass (search, comments, soft-delete, settings, live sync).
 
 ## License
 

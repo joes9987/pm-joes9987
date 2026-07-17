@@ -1,12 +1,12 @@
-/** Shared Tailwind class strings for the Cohort PM theme */
+/** Shared Tailwind class strings for the EudaPM theme */
 
 export const ui = {
   meshBg: 'mesh-background min-h-screen',
   pageMain: 'mx-auto max-w-6xl px-4 py-8',
   pageMainNarrow: 'mx-auto max-w-md px-4 py-16',
-  pageTitle: 'text-2xl font-semibold tracking-tight text-[var(--foreground)]',
+  pageTitle: 'font-display text-2xl font-semibold tracking-tight text-[var(--foreground)]',
   pageSubtitle: 'text-sm text-[var(--muted)]',
-  eyebrow: 'text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]',
+  eyebrow: 'text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]',
 
   card: 'surface-card rounded-2xl p-6',
   cardSm: 'surface-card rounded-xl p-4',

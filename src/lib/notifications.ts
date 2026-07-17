@@ -13,7 +13,7 @@ function buildDeadlineNotifications (tasks: Task[], now: Date = new Date()): Dea
   const notifications: DeadlineNotification[] = []
 
   for (const task of tasks) {
-    if (!task.assignee_id || !task.due_date || task.status === 'done') continue
+    if (!task.assignee_id || !task.due_date || task.status === 'done' || task.deleted_at) continue
 
     const status = getDeadlineStatus(task.due_date, task.status, now)
     if (status === 'overdue') {
@@ -38,13 +38,14 @@ function buildDeadlineNotifications (tasks: Task[], now: Date = new Date()): Dea
   return notifications
 }
 
+/** Inserts missing deadline notifications only — never resets read_at. */
 export async function syncDeadlineNotifications (
   supabase: SupabaseClient,
   userId: string,
   tasks: Task[]
 ): Promise<void> {
   const myOpenTasks = tasks.filter(
-    (task) => task.assignee_id === userId && task.status !== 'done' && task.due_date
+    (task) => task.assignee_id === userId && task.status !== 'done' && task.due_date && !task.deleted_at
   )
   const pending = buildDeadlineNotifications(myOpenTasks)
 
@@ -55,10 +56,9 @@ export async function syncDeadlineNotifications (
       user_id: item.user_id,
       type: item.type,
       task_id: item.task_id,
-      message: item.message,
-      read_at: null
+      message: item.message
     })),
-    { onConflict: 'user_id,task_id,type', ignoreDuplicates: false }
+    { onConflict: 'user_id,task_id,type', ignoreDuplicates: true }
   )
 }
 

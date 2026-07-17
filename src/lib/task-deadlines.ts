@@ -133,13 +133,13 @@ export function deadlineBadgeLabel (status: DeadlineStatus): string {
 export function deadlineBadgeClass (status: DeadlineStatus): string {
   switch (status) {
     case 'overdue':
-      return 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
+      return 'bg-[var(--danger-bg)] text-[var(--danger-fg)]'
     case 'due_today':
-      return 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200'
+      return 'bg-[var(--warning-bg)] text-[var(--warning-fg)]'
     case 'due_soon':
-      return 'bg-yellow-100 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-200'
+      return 'bg-[var(--accent-soft)] text-[var(--accent-foreground)]'
     case 'on_track':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+      return 'bg-[var(--success-bg)] text-[var(--success-fg)]'
     default:
       return ''
   }

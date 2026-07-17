@@ -1,6 +1,6 @@
 # Difficulty points + leaderboard
 
-Gamification for Cohort PM: tasks have difficulty, completed tasks award points, and the dashboard shows a live leaderboard. Top 3 weekly earners get a Brevo kudos email each Monday.
+Gamification for EudaPM: tasks have difficulty, completed tasks award points, and the Progress page shows a live leaderboard. Top 3 weekly earners get a Brevo kudos email each Monday.
 
 ## Scoring
 
