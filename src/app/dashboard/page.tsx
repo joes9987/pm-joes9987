@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
+import { GitHubActivity, GitHubRepoChip } from '@/components/GitHubActivity'
 import { MotivationPanel } from '@/components/MotivationPanel'
 import { TaskBoard } from '@/components/TaskBoard'
 import { syncDeadlineNotifications } from '@/lib/notifications'
@@ -49,6 +50,8 @@ export default async function DashboardPage ({ searchParams }: DashboardPageProp
 
   const taskList = (tasks ?? []) as Task[]
   const profileList = (members ?? []) as Profile[]
+  const projectList = (projects ?? []) as Project[]
+  const linkedProjects = projectList.filter((project) => project.github_repo)
 
   // Throttle: sync deadline notifications on dashboard visits only (not every AppShell nav).
   await syncDeadlineNotifications(
@@ -67,9 +70,28 @@ export default async function DashboardPage ({ searchParams }: DashboardPageProp
         <div className="mb-4">
           <MotivationPanel tasks={taskList} currentUserId={user.id} />
         </div>
+        {linkedProjects.length > 0 && (
+          <section className={`${ui.card} mb-4 animate-fade-up`}>
+            <h2 className={ui.sectionTitle}>Repo activity</h2>
+            <p className={`${ui.pageSubtitle} mt-1`}>Latest commits, PRs, and issues from linked GitHub repositories.</p>
+            <div className="mt-4 grid gap-6 lg:grid-cols-2">
+              {linkedProjects.slice(0, 4).map((project) => (
+                <div key={project.id}>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">{project.name}</p>
+                    <GitHubRepoChip repo={project.github_repo as string} />
+                  </div>
+                  <div className="mt-2">
+                    <GitHubActivity repo={project.github_repo as string} limit={5} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
         <TaskBoard
           initialTasks={taskList}
-          projects={(projects ?? []) as Project[]}
+          projects={projectList}
           members={profileList}
           currentUserId={user.id}
           initialQuickFilter={quickFilter}

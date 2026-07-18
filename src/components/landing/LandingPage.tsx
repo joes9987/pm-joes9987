@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { EudaLogo } from '@/components/brand/EudaLogo'
+import { HeroFlourish } from '@/components/brand/illustrations'
 import { PublicHeader } from '@/components/landing/PublicHeader'
 import {
   landingFeatures,
@@ -36,24 +38,27 @@ export function LandingPage ({ showConfigWarning = false }: LandingPageProps) {
         )}
 
         {/* Hero */}
-        <section aria-labelledby="hero-title" className="animate-fade-up pb-16 pt-6 md:pb-20 md:pt-10">
-          <p className={ui.eyebrow}>{landingHero.eyebrow}</p>
-          <span className="brand-mark mb-5 mt-4 inline-flex">EP</span>
-          <h1 id="hero-title" className="font-display text-5xl font-extrabold tracking-tight sm:text-6xl">
-            <span className="text-gradient">{landingHero.title}</span>
-          </h1>
-          <p className="mt-3 text-xl font-medium text-[var(--foreground)]">{landingHero.tagline}</p>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--muted-foreground)]">
-            {landingHero.subhead}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={landingHero.primaryCta.href} className={ui.btnPrimaryLg}>
-              {landingHero.primaryCta.label}
-            </Link>
-            <Link href={landingHero.secondaryCta.href} className={ui.btnSecondary}>
-              {landingHero.secondaryCta.label}
-            </Link>
+        <section aria-labelledby="hero-title" className="animate-fade-up grid items-center gap-10 pb-16 pt-6 md:grid-cols-[1fr_minmax(0,380px)] md:pb-20 md:pt-10">
+          <div>
+            <p className={ui.eyebrow}>{landingHero.eyebrow}</p>
+            <EudaLogo className="mb-5 mt-4" />
+            <h1 id="hero-title" className="font-display text-5xl font-extrabold tracking-tight sm:text-6xl">
+              <span className="text-gradient">{landingHero.title}</span>
+            </h1>
+            <p className="mt-3 text-xl font-medium text-[var(--foreground)]">{landingHero.tagline}</p>
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--muted-foreground)]">
+              {landingHero.subhead}
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href={landingHero.primaryCta.href} className={ui.btnPrimaryLg}>
+                {landingHero.primaryCta.label}
+              </Link>
+              <Link href={landingHero.secondaryCta.href} className={ui.btnSecondary}>
+                {landingHero.secondaryCta.label}
+              </Link>
+            </div>
           </div>
+          <HeroFlourish className="mx-auto hidden w-full max-w-sm md:block" />
         </section>
 
         {/* Purpose */}

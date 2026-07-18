@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { AuthSprig } from '@/components/brand/illustrations'
 import { ui } from '@/lib/ui'
 
 type ErrorPageProps = {
@@ -16,6 +17,7 @@ export default function ErrorPage ({ error, reset }: ErrorPageProps) {
   return (
     <main className={`${ui.meshBg} px-4 py-16`}>
       <div className="mx-auto max-w-3xl">
+        <AuthSprig className="mb-4 h-12 w-12" />
         <h1 className={ui.pageTitle}>Something went wrong</h1>
         <p className={`mt-2 ${ui.pageSubtitle}`}>
           Try again. If this keeps happening, refresh the page.

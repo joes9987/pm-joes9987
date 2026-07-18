@@ -17,6 +17,7 @@ create table if not exists public.projects (
   owner_id uuid not null references public.profiles (id) on delete cascade,
   archived boolean not null default false,
   target_date timestamptz,
+  github_repo text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

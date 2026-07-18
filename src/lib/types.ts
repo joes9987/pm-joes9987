@@ -17,6 +17,7 @@ export type Project = {
   owner_id: string
   archived: boolean
   target_date: string | null
+  github_repo: string | null
   created_at: string
   updated_at?: string
 }

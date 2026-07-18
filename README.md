@@ -64,6 +64,8 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
+Optional: set `GITHUB_TOKEN` (a fine-grained personal access token, no scopes needed for public repos) to raise the GitHub API rate limit for the repo activity feed from 60 to 5,000 requests/hour.
+
 5. In Supabase Auth settings, disable email confirmation for review-week smoke tests (optional).
 
 6. Run locally:
@@ -96,6 +98,7 @@ npm run dev
 - [x] **Soft-delete tasks** — delete/restore with “Show deleted”
 - [x] **Profile settings** — display name (`/settings`)
 - [x] **Live TaskBoard** — Realtime merges for insert/update/delete
+- [x] **GitHub repo tracking** — link a public repo to a project; commits, PRs, and issues surface on Projects and the Dashboard (cached 5 min)
 
 ## Email digest setup
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { EmptyLeaderboard } from '@/components/brand/illustrations'
 import { aggregateLeaderboard, type LeaderboardRow } from '@/lib/leaderboard'
 import { createClient } from '@/lib/supabase/client'
 import type { PointEvent, Profile } from '@/lib/types'
@@ -66,9 +67,10 @@ export function Leaderboard ({ initialRows, profiles, currentUserId }: Leaderboa
       </div>
 
       {rows.length === 0 ? (
-        <p className="mt-6 text-sm text-[var(--muted)]">
-          No points yet. Complete assigned tasks to climb the board.
-        </p>
+        <div className="mt-6 flex flex-col items-center gap-3 py-4 text-center text-sm text-[var(--muted)]">
+          <EmptyLeaderboard />
+          <p>No points yet. Complete assigned tasks to climb the board.</p>
+        </div>
       ) : (
         <ol className={`mt-4 ${ui.divider}`}>
           {rows.map((row) => {

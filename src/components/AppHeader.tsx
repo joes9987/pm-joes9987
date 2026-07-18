@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { EudaLogo } from '@/components/brand/EudaLogo'
 import { NotificationBell } from '@/components/NotificationBell'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ui } from '@/lib/ui'
@@ -61,7 +62,7 @@ export function AppHeader ({ email, displayName, userId, initialNotifications }:
     <header className="app-header sticky top-0 z-40">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="brand-mark shrink-0" aria-hidden>EP</span>
+          <EudaLogo />
           <div className="min-w-0">
             <Link href="/dashboard" className="font-display text-lg font-bold tracking-tight">
               <span className="text-gradient">EudaPM</span>

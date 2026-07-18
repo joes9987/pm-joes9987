@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { EmptyProjects } from '@/components/brand/illustrations'
+import { GitHubActivity, GitHubRepoChip } from '@/components/GitHubActivity'
+import { normalizeGithubRepo } from '@/lib/github'
 import { createClient } from '@/lib/supabase/client'
 import { formatProjectCountdown, fromDatetimeLocalValue, toDatetimeLocalValue } from '@/lib/task-deadlines'
 import { ui } from '@/lib/ui'
@@ -20,6 +23,7 @@ export function ProjectManager ({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [targetDate, setTargetDate] = useState('')
+  const [githubRepo, setGithubRepo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -27,13 +31,28 @@ export function ProjectManager ({
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
   const [editTargetDate, setEditTargetDate] = useState('')
+  const [editGithubRepo, setEditGithubRepo] = useState('')
   const [editLoading, setEditLoading] = useState(false)
+  const [activityProjectId, setActivityProjectId] = useState<string | null>(null)
+
+  function resolveRepoInput (input: string): { repo: string | null; invalid: boolean } {
+    if (!input.trim()) return { repo: null, invalid: false }
+    const repo = normalizeGithubRepo(input)
+    return { repo, invalid: repo === null }
+  }
 
   async function createProject (event: React.FormEvent) {
     event.preventDefault()
-    setLoading(true)
     setError(null)
     setSuccess(null)
+
+    const { repo, invalid } = resolveRepoInput(githubRepo)
+    if (invalid) {
+      setError('GitHub repository must be "owner/repo" or a github.com URL.')
+      return
+    }
+
+    setLoading(true)
 
     const supabase = createClient()
     const { data, error: insertError } = await supabase
@@ -42,7 +61,8 @@ export function ProjectManager ({
         name,
         description,
         owner_id: userId,
-        target_date: fromDatetimeLocalValue(targetDate)
+        target_date: fromDatetimeLocalValue(targetDate),
+        github_repo: repo
       })
       .select('*')
       .single()
@@ -58,6 +78,7 @@ export function ProjectManager ({
     setName('')
     setDescription('')
     setTargetDate('')
+    setGithubRepo('')
     setSuccess(`Project "${(data as Project).name}" created. You can now add tasks on the dashboard.`)
     router.refresh()
   }
@@ -67,6 +88,7 @@ export function ProjectManager ({
     setEditName(project.name)
     setEditDescription(project.description)
     setEditTargetDate(toDatetimeLocalValue(project.target_date))
+    setEditGithubRepo(project.github_repo ?? '')
     setError(null)
     setSuccess(null)
   }
@@ -76,12 +98,20 @@ export function ProjectManager ({
     setEditName('')
     setEditDescription('')
     setEditTargetDate('')
+    setEditGithubRepo('')
   }
 
   async function saveProject (projectId: string) {
-    setEditLoading(true)
     setError(null)
     setSuccess(null)
+
+    const { repo, invalid } = resolveRepoInput(editGithubRepo)
+    if (invalid) {
+      setError('GitHub repository must be "owner/repo" or a github.com URL.')
+      return
+    }
+
+    setEditLoading(true)
 
     const supabase = createClient()
     const { data, error: updateError } = await supabase
@@ -90,6 +120,7 @@ export function ProjectManager ({
         name: editName,
         description: editDescription,
         target_date: fromDatetimeLocalValue(editTargetDate),
+        github_repo: repo,
         updated_at: new Date().toISOString()
       })
       .eq('id', projectId)
@@ -152,6 +183,16 @@ export function ProjectManager ({
             />
           </label>
           <label className={`${ui.label} md:col-span-2`}>
+            GitHub repository (optional)
+            <input
+              className={ui.field}
+              value={githubRepo}
+              onChange={(e) => setGithubRepo(e.target.value)}
+              placeholder="owner/repo or https://github.com/owner/repo"
+              disabled={loading}
+            />
+          </label>
+          <label className={`${ui.label} md:col-span-2`}>
             Description
             <textarea
               className={ui.field}
@@ -180,7 +221,10 @@ export function ProjectManager ({
         <h2 className={ui.sectionTitle}>Your projects</h2>
         <ul className={`mt-4 ${ui.divider}`}>
           {projects.length === 0 && (
-            <li className="py-6 text-sm text-[var(--muted)]">No projects yet.</li>
+            <li className="flex flex-col items-center gap-3 py-10 text-sm text-[var(--muted)]">
+              <EmptyProjects />
+              <span>No projects yet. Plant the first one above.</span>
+            </li>
           )}
           {projects.map((project) => {
             const countdown = formatProjectCountdown(project.target_date)
@@ -218,6 +262,16 @@ export function ProjectManager ({
                       />
                     </label>
                     <label className={`${ui.label} md:col-span-2`}>
+                      GitHub repository (optional)
+                      <input
+                        className={ui.field}
+                        value={editGithubRepo}
+                        onChange={(e) => setEditGithubRepo(e.target.value)}
+                        placeholder="owner/repo or https://github.com/owner/repo"
+                        disabled={editLoading}
+                      />
+                    </label>
+                    <label className={`${ui.label} md:col-span-2`}>
                       Description
                       <textarea
                         className={ui.field}
@@ -237,38 +291,60 @@ export function ProjectManager ({
                     </div>
                   </form>
                 ) : (
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="font-medium text-[var(--foreground)]">
-                        {project.name}
-                        {project.archived && (
-                          <span className="ml-2 rounded-full bg-[var(--warning-bg)] px-2 py-0.5 text-xs font-medium text-[var(--warning-fg)]">
-                            archived
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-sm text-[var(--muted-foreground)]">{project.description || 'No description'}</p>
-                      {countdown && (
-                        <p className={`mt-1 text-xs font-medium ${
-                          countdown.includes('past deadline') ? 'text-[var(--danger-fg)]' : 'text-[var(--accent-foreground)]'
-                        }`}>
-                          {countdown}
+                  <>
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-medium text-[var(--foreground)]">
+                          {project.name}
+                          {project.archived && (
+                            <span className="ml-2 rounded-full bg-[var(--warning-bg)] px-2 py-0.5 text-xs font-medium text-[var(--warning-fg)]">
+                              archived
+                            </span>
+                          )}
                         </p>
-                      )}
+                        <p className="text-sm text-[var(--muted-foreground)]">{project.description || 'No description'}</p>
+                        {countdown && (
+                          <p className={`mt-1 text-xs font-medium ${
+                            countdown.includes('past deadline') ? 'text-[var(--danger-fg)]' : 'text-[var(--accent-foreground)]'
+                          }`}>
+                            {countdown}
+                          </p>
+                        )}
+                        {project.github_repo && (
+                          <div className="mt-2">
+                            <GitHubRepoChip repo={project.github_repo} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {project.github_repo && (
+                          <button
+                            type="button"
+                            onClick={() => setActivityProjectId((prev) => (prev === project.id ? null : project.id))}
+                            className={ui.btnGhost}
+                            aria-expanded={activityProjectId === project.id}
+                          >
+                            {activityProjectId === project.id ? 'Hide activity' : 'Activity'}
+                          </button>
+                        )}
+                        {isOwner && (
+                          <button type="button" onClick={() => startEditing(project)} className={ui.btnGhost}>
+                            Edit
+                          </button>
+                        )}
+                        {isOwner && (
+                          <button type="button" onClick={() => toggleArchive(project)} className={ui.btnGhost}>
+                            {project.archived ? 'Restore' : 'Archive'}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {isOwner && (
-                        <button type="button" onClick={() => startEditing(project)} className={ui.btnGhost}>
-                          Edit
-                        </button>
-                      )}
-                      {isOwner && (
-                        <button type="button" onClick={() => toggleArchive(project)} className={ui.btnGhost}>
-                          {project.archived ? 'Restore' : 'Archive'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                    {activityProjectId === project.id && project.github_repo && (
+                      <div className="mt-4">
+                        <GitHubActivity repo={project.github_repo} />
+                      </div>
+                    )}
+                  </>
                 )}
               </li>
             )

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { EmptyTasks } from '@/components/brand/illustrations'
 import { createClient } from '@/lib/supabase/client'
 import { TaskComments } from '@/components/TaskComments'
 import {
@@ -571,7 +572,10 @@ export function TaskBoard ({
 
         <ul className={`mt-4 ${ui.divider}`}>
           {filteredTasks.length === 0 && (
-            <li className="py-8 text-center text-sm text-[var(--muted)]">No tasks match these filters.</li>
+            <li className="flex flex-col items-center gap-3 py-10 text-center text-sm text-[var(--muted)]">
+              <EmptyTasks />
+              <span>No tasks match these filters.</span>
+            </li>
           )}
           {filteredTasks.map((task) => {
             const deadlineStatus = getDeadlineStatus(task.due_date, task.status)

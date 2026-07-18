@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import { EmptyNotifications } from '@/components/brand/illustrations'
 import { createClient } from '@/lib/supabase/client'
 import { formatRelativeTime } from '@/lib/notifications'
 import { ui } from '@/lib/ui'
@@ -136,8 +137,9 @@ export function NotificationBell ({ userId, initialNotifications }: Notification
           </div>
           <ul className="max-h-80 overflow-y-auto">
             {notifications.length === 0 && (
-              <li className="px-4 py-6 text-center text-sm text-[var(--muted)]">
-                No notifications yet.
+              <li className="flex flex-col items-center gap-2 px-4 py-6 text-center text-sm text-[var(--muted)]">
+                <EmptyNotifications />
+                <span>No notifications yet.</span>
               </li>
             )}
             {notifications.map((notification) => (
