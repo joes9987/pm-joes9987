@@ -22,7 +22,7 @@ export function NotificationBell ({ userId, initialNotifications }: Notification
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel(`notifications-${userId}`)
+      .channel(`notifications-${userId}-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

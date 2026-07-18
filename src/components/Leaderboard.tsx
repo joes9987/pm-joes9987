@@ -34,7 +34,7 @@ export function Leaderboard ({ initialRows, profiles, currentUserId }: Leaderboa
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel('leaderboard-points')
+      .channel(`leaderboard-points-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'point_events' },

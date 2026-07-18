@@ -40,7 +40,7 @@ export function TaskComments ({ taskId, currentUserId, members }: TaskCommentsPr
 
     const supabase = createClient()
     const channel = supabase
-      .channel(`comments-${taskId}`)
+      .channel(`comments-${taskId}-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'task_comments', filter: `task_id=eq.${taskId}` },

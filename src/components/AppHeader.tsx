@@ -66,8 +66,8 @@ export function AppHeader ({ email, displayName, userId, initialNotifications }:
           </div>
         </div>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <nav className="flex flex-wrap items-center gap-1">
+        <div className="flex items-center gap-2">
+          <nav className="hidden flex-wrap items-center gap-1 md:flex">
             <NavLink href="/dashboard" label="Dashboard" />
             <NavLink href="/projects" label="Projects" />
             <NavLink href="/progress" label="Progress" />
@@ -76,15 +76,10 @@ export function AppHeader ({ email, displayName, userId, initialNotifications }:
           </nav>
           <NotificationBell userId={userId} initialNotifications={initialNotifications} />
           <ThemeToggle />
-          <SignOutButton />
-        </div>
-
-        <div className="flex items-center gap-2 md:hidden">
-          <NotificationBell userId={userId} initialNotifications={initialNotifications} />
-          <ThemeToggle />
+          <SignOutButton className="hidden md:inline-flex" />
           <button
             type="button"
-            className={ui.btnGhost}
+            className={`${ui.btnGhost} md:hidden`}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}

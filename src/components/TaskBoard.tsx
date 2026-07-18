@@ -100,7 +100,7 @@ export function TaskBoard ({
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel('tasks-live')
+      .channel(`tasks-live-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks' },
