@@ -20,7 +20,11 @@ function SignOutButton ({ className }: { className?: string }) {
   }
 
   return (
-    <button type="button" onClick={signOut} className={className ?? ui.btnGhost}>
+    <button
+      type="button"
+      onClick={signOut}
+      className={className ? `${ui.btnGhost} ${className}` : ui.btnGhost}
+    >
       Sign out
     </button>
   )
@@ -100,7 +104,7 @@ export function AppHeader ({ email, displayName, userId, initialNotifications }:
             <NavLink href="/progress" label="Progress" onNavigate={() => setMenuOpen(false)} />
             <NavLink href="/search" label="Search" onNavigate={() => setMenuOpen(false)} />
             <NavLink href="/settings" label="Settings" onNavigate={() => setMenuOpen(false)} />
-            <SignOutButton className={`${ui.btnGhost} mt-2 w-full text-left`} />
+            <SignOutButton className="mt-2 w-full text-left" />
           </div>
         </nav>
       )}
