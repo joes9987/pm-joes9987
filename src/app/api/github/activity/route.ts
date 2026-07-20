@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { normalizeGithubRepo, type GitHubEvent } from '@/lib/github'
+import { createClient } from '@/lib/supabase/server'
 
 const GITHUB_API = 'https://api.github.com'
 const REVALIDATE_SECONDS = 300
@@ -42,6 +43,16 @@ async function fetchGithub (path: string): Promise<Response> {
 }
 
 export async function GET (request: Request) {
+  const supabase = await createClient()
+  if (!supabase) {
+    return NextResponse.json({ error: 'Service unavailable.' }, { status: 503 })
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Sign in required.' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(request.url)
   const repo = normalizeGithubRepo(searchParams.get('repo') ?? '')
 

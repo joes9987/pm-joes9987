@@ -32,6 +32,7 @@ export type Task = {
   assignee_id: string | null
   created_by: string
   due_date: string | null
+  completed_at?: string | null
   deleted_at?: string | null
   created_at: string
   updated_at: string

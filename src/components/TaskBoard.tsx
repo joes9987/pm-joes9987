@@ -86,6 +86,17 @@ export function TaskBoard ({
     [projects]
   )
 
+  function isProjectOwner (targetProjectId: string): boolean {
+    const project = projects.find((item) => item.id === targetProjectId)
+    return project?.owner_id === currentUserId
+  }
+
+  useEffect(() => {
+    if (!isProjectOwner(projectId) && difficulty !== 'low') {
+      setDifficulty('low')
+    }
+  }, [projectId, difficulty, projects, currentUserId])
+
   useEffect(() => {
     if (!completionMessage) return
     const timer = window.setTimeout(() => setCompletionMessage(null), 4000)
@@ -462,11 +473,18 @@ export function TaskBoard ({
                 disabled={activeProjects.length === 0 || loading}
               >
                 {TASK_DIFFICULTIES.map((level) => (
-                  <option key={level} value={level}>
+                  <option
+                    key={level}
+                    value={level}
+                    disabled={level !== 'low' && !isProjectOwner(projectId)}
+                  >
                     {formatDifficulty(level)} ({DIFFICULTY_POINTS[level]} pts)
                   </option>
                 ))}
               </select>
+              <span className="mt-1 block text-xs text-[var(--muted)]">
+                Low 10 / Mid 25 / High 50 pts. Only the project owner can set Mid or High.
+              </span>
             </label>
             <label className={ui.label}>
               Due date (optional)
@@ -654,14 +672,23 @@ export function TaskBoard ({
                         className={selectClass}
                         value={editDifficulty}
                         onChange={(e) => setEditDifficulty(e.target.value as TaskDifficulty)}
-                        disabled={editLoading}
+                        disabled={editLoading || task.status === 'done' || !isProjectOwner(editProjectId)}
                       >
                         {TASK_DIFFICULTIES.map((level) => (
-                          <option key={level} value={level}>
+                          <option
+                            key={level}
+                            value={level}
+                            disabled={level !== 'low' && !isProjectOwner(editProjectId)}
+                          >
                             {formatDifficulty(level)} ({DIFFICULTY_POINTS[level]} pts)
                           </option>
                         ))}
                       </select>
+                      {task.status === 'done' && (
+                        <span className="mt-1 block text-xs text-[var(--muted)]">
+                          Difficulty is locked after completion.
+                        </span>
+                      )}
                     </label>
                     <label className={ui.label}>
                       Due date (optional)

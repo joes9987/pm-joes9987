@@ -95,7 +95,8 @@ export function sortByUrgency (tasks: Task[], now: Date = new Date()): Task[] {
 export function isOnTimeCompletion (task: Task): boolean {
   if (task.status !== 'done') return false
   if (!task.due_date) return true
-  return new Date(task.updated_at) <= new Date(task.due_date)
+  const finishedAt = task.completed_at ?? task.updated_at
+  return new Date(finishedAt) <= new Date(task.due_date)
 }
 
 export function formatDueDate (dueDate: string): string {

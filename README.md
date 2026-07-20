@@ -76,6 +76,10 @@ npm run dev
 
 7. Sign up, create a project (optionally set a target deadline), create and assign a task with a due date. Edit projects and reassign tasks after creation on **Projects** and **Dashboard**.
 
+8. Run tests: `npm test`
+
+**Peer reviewers:** See [docs/REVIEWER.md](docs/REVIEWER.md) for a shared demo account and smoke-test checklist.
+
 ## Baseline features
 
 - [x] Email/password auth (30+ accounts)
@@ -111,7 +115,8 @@ See [docs/LEADERBOARD.md](docs/LEADERBOARD.md) for difficulty scoring, Realtime 
 ## Known limitations
 
 - Email digests require Brevo sender verification and Supabase Edge Function secrets (not auto-configured on clone)
-- No GitHub issue/PR linking yet
+- GitHub activity is read-only for public repos (session-gated API, 5-min cache; no webhooks)
+- Difficulty Mid/High can only be set by the project owner (server-enforced)
 - No review/vote module (planned differentiator for later projects)
 - No invite-only signup / Kanban / calendar views yet
 - Email confirmation may need to be disabled in Supabase for frictionless reviewer access

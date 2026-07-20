@@ -35,6 +35,7 @@ create table if not exists public.tasks (
   assignee_id uuid references public.profiles (id) on delete set null,
   created_by uuid not null references public.profiles (id) on delete cascade,
   due_date timestamptz,
+  completed_at timestamptz,
   deleted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -222,6 +223,52 @@ as $$
   end;
 $$;
 
+create or replace function public.enforce_task_difficulty()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  project_owner uuid;
+begin
+  select owner_id into project_owner
+  from public.projects
+  where id = new.project_id;
+
+  if tg_op = 'UPDATE' and old.status = 'done' then
+    new.difficulty := old.difficulty;
+  end if;
+
+  if new.difficulty <> 'low'::public.task_difficulty
+    and auth.uid() is distinct from project_owner
+  then
+    raise exception 'Only the project owner can set difficulty above Low (10 pts)';
+  end if;
+
+  return new;
+end;
+$$;
+
+create or replace function public.set_task_completed_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.status = 'done'::public.task_status
+    and old.status is distinct from 'done'::public.task_status
+  then
+    new.completed_at := coalesce(new.completed_at, now());
+  elsif new.status is distinct from 'done'::public.task_status
+    and old.status = 'done'::public.task_status
+  then
+    new.completed_at := null;
+  end if;
+
+  return new;
+end;
+$$;
+
 create or replace function public.award_task_points()
 returns trigger
 language plpgsql
@@ -244,7 +291,7 @@ begin
     return new;
   end if;
 
-  recipient := coalesce(new.assignee_id, auth.uid(), new.created_by);
+  recipient := coalesce(new.assignee_id, new.created_by);
   if recipient is null then
     return new;
   end if;
@@ -252,7 +299,7 @@ begin
   pts := public.difficulty_points(new.difficulty);
 
   insert into public.point_events (user_id, task_id, points, difficulty, awarded_at)
-  values (recipient, new.id, pts, new.difficulty, now())
+  values (recipient, new.id, pts, new.difficulty, coalesce(new.completed_at, now()))
   on conflict (task_id) do update
     set user_id = excluded.user_id,
         points = excluded.points,
@@ -261,7 +308,7 @@ begin
           when public.point_events.user_id is distinct from excluded.user_id
             or public.point_events.points is distinct from excluded.points
             or public.point_events.difficulty is distinct from excluded.difficulty
-          then now()
+          then excluded.awarded_at
           else public.point_events.awarded_at
         end;
 
@@ -332,6 +379,16 @@ drop trigger if exists on_task_completed_notify on public.tasks;
 create trigger on_task_completed_notify
   after update of status on public.tasks
   for each row execute function public.notify_task_completed();
+
+drop trigger if exists enforce_task_difficulty on public.tasks;
+create trigger enforce_task_difficulty
+  before insert or update of difficulty, project_id on public.tasks
+  for each row execute function public.enforce_task_difficulty();
+
+drop trigger if exists set_task_completed_at on public.tasks;
+create trigger set_task_completed_at
+  before update of status on public.tasks
+  for each row execute function public.set_task_completed_at();
 
 drop trigger if exists on_task_points_award on public.tasks;
 create trigger on_task_points_award
