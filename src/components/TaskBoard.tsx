@@ -35,6 +35,17 @@ import {
 const fieldClass = ui.field
 const selectClass = ui.field
 
+function parseUpdatedTask<T> (rows: T[] | null, error: { message: string } | null): { task: T | null; errorMessage: string | null } {
+  if (error) return { task: null, errorMessage: error.message }
+  if (!rows?.length) {
+    return {
+      task: null,
+      errorMessage: 'Could not save changes. You may not have permission to update this task.'
+    }
+  }
+  return { task: rows[0], errorMessage: null }
+}
+
 type TaskBoardProps = {
   initialTasks: Task[]
   projects: Project[]
@@ -208,21 +219,26 @@ export function TaskBoard ({
 
   async function updateTaskStatus (taskId: string, status: TaskStatus) {
     const previousTask = tasks.find((task) => task.id === taskId)
+    if (!previousTask || !canEditTask(previousTask)) {
+      setError('You can only update tasks you created, are assigned to, or own via the project.')
+      return
+    }
+    if (previousTask.status === status) return
+
     const supabase = createClient()
     const { data, error: updateError } = await supabase
       .from('tasks')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', taskId)
       .select('*')
-      .single()
 
-    if (updateError) {
-      setError(updateError.message)
+    const { task: updatedTask, errorMessage } = parseUpdatedTask(data, updateError)
+    if (errorMessage || !updatedTask) {
+      setError(errorMessage ?? 'Could not update task status.')
       return
     }
 
-    const updatedTask = data as Task
-    setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask : task)))
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask as Task : task)))
 
     if (status === 'done' && previousTask?.status !== 'done') {
       if (isOnTimeCompletion(updatedTask)) {
@@ -291,16 +307,16 @@ export function TaskBoard ({
       })
       .eq('id', taskId)
       .select('*')
-      .single()
 
     setEditLoading(false)
 
-    if (updateError) {
-      setError(updateError.message)
+    const { task: updatedTask, errorMessage } = parseUpdatedTask(data, updateError)
+    if (errorMessage || !updatedTask) {
+      setError(errorMessage ?? 'Could not save task.')
       return
     }
 
-    setTasks((prev) => prev.map((task) => (task.id === taskId ? (data as Task) : task)))
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask as Task : task)))
     cancelEditingTask()
   }
 
@@ -314,14 +330,14 @@ export function TaskBoard ({
       .update({ deleted_at: deletedAt, updated_at: deletedAt })
       .eq('id', task.id)
       .select('*')
-      .single()
 
-    if (updateError) {
-      setError(updateError.message)
+    const { task: updatedTask, errorMessage } = parseUpdatedTask(data, updateError)
+    if (errorMessage || !updatedTask) {
+      setError(errorMessage ?? 'Could not delete task.')
       return
     }
 
-    setTasks((prev) => prev.map((item) => (item.id === task.id ? (data as Task) : item)))
+    setTasks((prev) => prev.map((item) => (item.id === task.id ? updatedTask as Task : item)))
   }
 
   async function restoreTask (task: Task) {
@@ -332,14 +348,14 @@ export function TaskBoard ({
       .update({ deleted_at: null, updated_at: new Date().toISOString() })
       .eq('id', task.id)
       .select('*')
-      .single()
 
-    if (updateError) {
-      setError(updateError.message)
+    const { task: updatedTask, errorMessage } = parseUpdatedTask(data, updateError)
+    if (errorMessage || !updatedTask) {
+      setError(errorMessage ?? 'Could not restore task.')
       return
     }
 
-    setTasks((prev) => prev.map((item) => (item.id === task.id ? (data as Task) : item)))
+    setTasks((prev) => prev.map((item) => (item.id === task.id ? updatedTask as Task : item)))
   }
 
   async function loadDeletedTasks () {
@@ -751,7 +767,7 @@ export function TaskBoard ({
                             Restore
                           </button>
                         )}
-                        {!task.deleted_at && (
+                        {!task.deleted_at && canEditTask(task) && (
                           <select
                             className={ui.select}
                             value={task.status}
@@ -761,6 +777,11 @@ export function TaskBoard ({
                               <option key={status} value={status}>{formatStatus(status)}</option>
                             ))}
                           </select>
+                        )}
+                        {!task.deleted_at && !canEditTask(task) && (
+                          <span className="rounded-full bg-[var(--nav-active)] px-2.5 py-1 text-xs font-medium capitalize text-[var(--nav-active-fg)]">
+                            {formatStatus(task.status)}
+                          </span>
                         )}
                       </div>
                     </div>
